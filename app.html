@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PixelMind™ — Professional Design Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#04080f;--blue:#4FC3F7;--blue2:#0ea5e9;
+  --gold:#f59e0b;--green:#10b981;--pink:#ec4899;--purple:#8b5cf6;
+  --surface:rgba(255,255,255,0.03);--surface2:rgba(255,255,255,0.06);
+  --border:rgba(79,195,247,0.12);--border2:rgba(255,255,255,0.07);
+  --text:#f0f8ff;--muted:#4a6a82;--muted2:#8ab0c8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--navy);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:rgba(79,195,247,0.06);top:-200px;left:-100px}
+.orb2{width:500px;height:500px;background:rgba(139,92,246,0.04);bottom:-100px;right:-100px}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:72px;background:rgba(4,8,15,0.96);border-right:1px solid var(--border2);display:flex;flex-direction:column;align-items:center;padding:16px 0;z-index:200;backdrop-filter:blur(20px)}
+.sidebar-logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#4FC3F7,#0d5a80);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--navy);margin-bottom:28px;cursor:pointer;box-shadow:0 0 24px rgba(79,195,247,0.3);flex-shrink:0}
+.sidebar-tools{display:flex;flex-direction:column;gap:2px;flex:1;width:100%;padding:0 8px;overflow-y:auto;scrollbar-width:none}
+.sidebar-tools::-webkit-scrollbar{display:none}
+.sdiv{width:36px;height:1px;background:var(--border2);margin:6px auto;flex-shrink:0}
+.scat{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);margin:4px 0 6px;text-align:center;flex-shrink:0}
+.stool{width:56px;height:52px;border-radius:11px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.2s;position:relative}
+.stool:hover{background:var(--surface2)}
+.stool.active{background:rgba(79,195,247,0.12);box-shadow:0 0 0 1px rgba(79,195,247,0.3)}
+.stool-icon{font-size:18px;line-height:1}
+.stool-label{font-size:7px;font-family:'DM Mono',monospace;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.stool.active .stool-label{color:var(--blue)}
+.tip{position:absolute;left:66px;top:50%;transform:translateY(-50%);background:rgba(4,8,15,0.95);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.stool:hover .tip{opacity:1}
+
+/* MAIN */
+.main{margin-left:72px;min-height:100vh;position:relative;z-index:1}
+
+/* TOPBAR */
+.topbar{height:54px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(4,8,15,0.85);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100}
+.tb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--blue)}
+.tb-badge{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:3px 8px;letter-spacing:1px}
+.tb-center{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;display:flex;align-items:center;gap:8px}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* HOME */
+#home{display:block}
+.home-hero{padding:72px 48px 56px;border-bottom:1px solid var(--border2);position:relative;overflow:hidden}
+.home-hero::after{content:'PIXELMIND';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-family:'Bebas Neue',sans-serif;font-size:200px;color:rgba(79,195,247,0.025);pointer-events:none;white-space:nowrap}
+.eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--blue);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--blue)}
+.home-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,110px);line-height:0.92;letter-spacing:-1px;margin-bottom:22px}
+.home-title span{color:var(--blue)}
+.home-sub{font-size:15px;color:var(--muted2);line-height:1.75;max-width:500px;margin-bottom:44px;font-weight:300}
+.home-stats{display:flex;gap:44px}
+.hs-n{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--blue);line-height:1}
+.hs-l{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:3px}
+
+/* TOOL GRID */
+.tg-wrap{padding:44px 48px}
+.tg-cat-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--muted);margin-bottom:18px;display:block}
+.tg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:36px}
+.tgc{background:var(--surface);border:1px solid var(--border2);border-radius:13px;padding:18px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.tgc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cc,var(--blue));opacity:0;transition:opacity 0.2s}
+.tgc:hover{background:var(--surface2);border-color:rgba(255,255,255,0.13);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+.tgc:hover::before{opacity:1}
+.tgc-icon{font-size:22px;margin-bottom:2px}
+.tgc-name{font-weight:700;font-size:13px}
+.tgc-desc{font-size:11px;color:var(--muted);line-height:1.5;flex-grow:1;font-weight:300}
+.tgc-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cc,var(--blue));margin-top:2px}
+
+/* TOOL PAGES */
+.tool-page{display:none;padding:40px 48px 80px;max-width:880px}
+.tool-page.active{display:block}
+.tp-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.tp-eyebrow::before{content:'';width:18px;height:1px;background:var(--muted)}
+.tp-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,5vw,68px);letter-spacing:-1px;line-height:0.92;margin-bottom:12px}
+.tp-title span{color:var(--blue)}
+.tp-desc{font-size:14px;color:var(--muted2);line-height:1.75;max-width:540px;font-weight:300;margin-bottom:32px}
+
+/* INPUTS */
+.field{margin-bottom:14px}
+.fl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--blue);margin-bottom:7px;display:block}
+input,textarea,select{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:13px 16px;outline:none;transition:all 0.2s;resize:none;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-color:rgba(79,195,247,0.4);background:rgba(79,195,247,0.04);box-shadow:0 0 0 3px rgba(79,195,247,0.06)}
+textarea{min-height:100px;line-height:1.65}
+select option{background:#070d1a}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* BUTTON */
+.go{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:var(--navy);border:none;border-radius:10px;padding:14px 30px;font-family:'Outfit',sans-serif;font-weight:800;font-size:13px;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;margin-top:4px}
+.go:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(79,195,247,0.3)}
+.go:disabled{opacity:0.4;cursor:default;transform:none}
+.go-arr{font-size:16px;transition:transform 0.2s}
+.go:hover .go-arr{transform:translateX(3px)}
+
+/* LOADER */
+.loader{display:none;align-items:center;gap:12px;margin-top:14px;font-size:13px;color:var(--muted2);font-weight:300}
+.loader.on{display:flex}
+.lbar{width:100px;height:2px;background:var(--border2);border-radius:2px;overflow:hidden}
+.lfill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:2px;animation:ldr 1.5s ease-in-out infinite}
+@keyframes ldr{0%{width:0;margin-left:0}50%{width:80%;margin-left:0}100%{width:0;margin-left:100%}}
+.err{color:#f87171;font-size:13px;margin-top:10px;font-weight:500}
+
+/* RESULT */
+.result{margin-top:28px;background:var(--surface);border:1px solid rgba(79,195,247,0.2);border-radius:16px;overflow:hidden;box-shadow:0 0 60px rgba(79,195,247,0.05),0 32px 64px rgba(0,0,0,0.3)}
+.rh{background:linear-gradient(135deg,rgba(79,195,247,0.1),rgba(139,92,246,0.05));border-bottom:1px solid var(--border2);padding:14px 22px;display:flex;align-items:center;justify-content:space-between}
+.rh-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--blue)}
+.rb{padding:22px}
+.rl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--blue);margin-bottom:7px;display:block}
+.rt{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:-0.5px;margin-bottom:6px}
+.rtx{font-size:13px;color:var(--muted2);line-height:1.75;font-weight:300}
+.rdiv{border:none;border-top:1px solid var(--border2);margin:18px 0}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ri{background:rgba(255,255,255,0.03);border-radius:10px;padding:13px 15px}
+.ri label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--blue);display:block;margin-bottom:6px}
+.ri p{font-size:12px;color:var(--muted2);line-height:1.65;font-weight:300}
+.rlist{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.rli{display:flex;gap:10px;align-items:flex-start}
+.rln{font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);flex-shrink:0;margin-top:1px}
+.rlt{font-size:12px;color:var(--muted2);line-height:1.55;font-weight:300}
+
+/* SWATCHES */
+.swatches{display:flex;gap:7px;margin-bottom:14px}
+.sw{flex:1;height:110px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;padding:9px;transition:transform 0.15s;position:relative;overflow:hidden}
+.sw:hover{transform:translateY(-4px)}
+.sw::after{content:'COPY';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;opacity:0;transition:opacity 0.15s;background:rgba(0,0,0,0.4);padding:3px 7px;border-radius:3px}
+.sw:hover::after{opacity:1}
+.sw-hex{font-family:'DM Mono',monospace;font-size:9px;font-weight:500}
+.sw-role{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;opacity:0.6;margin-top:1px}
+.gstrip{height:4px;border-radius:2px;margin:10px 0 14px;opacity:0.7}
+
+/* FONT TABS */
+.ftabs{display:flex;gap:7px;margin-bottom:18px}
+.ftab{flex:1;padding:9px 6px;background:var(--surface);border:1px solid var(--border2);border-radius:9px;cursor:pointer;color:var(--muted);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;transition:all 0.15s;display:flex;flex-direction:column;gap:3px;align-items:center}
+.ftab.active{background:rgba(79,195,247,0.1);border-color:rgba(79,195,247,0.35);color:var(--blue)}
+.ftab-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted)}
+.ftab.active .ftab-tag{color:rgba(79,195,247,0.6)}
+.spec-d{font-size:36px;font-weight:700;line-height:1.1;margin:10px 0;letter-spacing:-0.5px}
+.spec-b{font-size:14px;color:var(--muted2);line-height:1.75;margin-bottom:14px;font-weight:300}
+
+/* CRITIQUE */
+.score-n{font-family:'Bebas Neue',sans-serif;font-size:80px;line-height:1}
+.pcard{border-left:2px solid #f87171;border-radius:0 10px 10px 0;padding:13px 15px;margin-bottom:11px;background:rgba(239,68,68,0.05)}
+.pissue{font-weight:700;font-size:13px;color:#f87171;margin-bottom:4px}
+.pwhy{font-size:12px;color:rgba(239,68,68,0.5);line-height:1.5;margin-bottom:7px}
+.fix-r{display:flex;gap:8px}
+.fix-l{font-family:'DM Mono',monospace;font-size:9px;color:var(--green);flex-shrink:0;margin-top:2px;letter-spacing:1px}
+.fix-t{font-size:12px;color:var(--green);line-height:1.5;font-weight:300}
+.str-r{display:flex;gap:12px;align-items:flex-start;margin-bottom:11px}
+.str-i{color:var(--green);font-size:14px;flex-shrink:0;margin-top:1px}
+.str-p{font-weight:700;font-size:13px;margin-bottom:3px}
+.str-w{font-size:12px;color:var(--muted2);line-height:1.5;font-weight:300}
+.iconic{background:linear-gradient(135deg,rgba(79,195,247,0.08),rgba(139,92,246,0.05));border:1px solid rgba(79,195,247,0.2);border-radius:12px;padding:16px 18px;margin-top:14px}
+.iconic-l{font-family:'DM Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:3px;display:block;margin-bottom:7px}
+.iconic-t{font-size:14px;font-weight:600;color:var(--blue);line-height:1.65}
+
+/* COPY BTN */
+.cpbtn{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:6px 12px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted2);cursor:pointer;transition:all 0.15s}
+.cpbtn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* CAPTIONS */
+.cap-cards{display:flex;flex-direction:column;gap:10px}
+.cap-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:15px 17px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;transition:border-color 0.15s}
+.cap-card:hover{border-color:rgba(79,195,247,0.25)}
+.cap-plat{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.cap-text{font-size:13px;color:var(--muted2);line-height:1.65;font-weight:300;flex:1;white-space:pre-wrap}
+
+/* HOOK CARDS */
+.hcards{display:flex;flex-direction:column;gap:9px}
+.hcard{background:var(--surface);border:1px solid var(--border2);border-radius:11px;padding:15px 17px;border-left:3px solid var(--blue);transition:all 0.15s}
+.hcard:hover{background:var(--surface2)}
+.htype{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;display:block}
+.htext{font-size:14px;font-weight:600;color:var(--text);line-height:1.5}
+
+/* HASHTAG */
+.hcloud{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.htag{padding:6px 13px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;border:1px solid transparent}
+.htag:hover{transform:scale(1.05)}
+
+/* VOICE BARS */
+.vtrait{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border2)}
+.vtrait:last-child{border-bottom:none}
+.vtl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);width:110px;flex-shrink:0}
+.vbar{flex:1;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.vfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+.vval{font-size:11px;color:var(--muted2);width:36px;text-align:right;flex-shrink:0;font-family:'DM Mono',monospace}
+
+/* DOC */
+.doc{background:rgba(255,255,255,0.04);border:1px solid rgba(79,195,247,0.2);border-radius:12px;padding:28px;color:var(--muted2);margin-top:4px;box-shadow:0 0 40px rgba(79,195,247,0.06)}
+.doch{border-bottom:1px solid rgba(79,195,247,0.3);padding-bottom:18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-end}
+.doct{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--blue);letter-spacing:1px}
+.docbr{font-family:'DM Mono',monospace;font-size:10px;color:#4FC3F7;letter-spacing:3px}
+.docs{margin-bottom:14px}
+.docsl{font-weight:800;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:7px;border-bottom:1px solid rgba(79,195,247,0.15);padding-bottom:3px}
+.docb{font-size:12px;line-height:1.7;color:var(--muted2)}
+.doctbl{width:100%;border-collapse:collapse;font-size:11px}
+.doctbl th{background:rgba(79,195,247,0.08);padding:7px 9px;text-align:left;font-weight:700;color:var(--blue);font-size:10px;letter-spacing:1px}
+.doctbl td{padding:7px 9px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2)}
+.doctot{background:#04080f;color:white;padding:11px 15px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.doctot-l{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px}
+.doctot-a{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#4FC3F7}
+
+/* SCOPE */
+.stbl{width:100%;border-collapse:collapse;font-size:13px}
+.stbl th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--blue);text-align:left;padding:9px 13px;border-bottom:1px solid var(--border2)}
+.stbl td{padding:11px 13px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted2);font-weight:300}
+.stbl tr:hover td{background:var(--surface);color:var(--text)}
+.stot{display:flex;justify-content:space-between;align-items:center;background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.2);border-radius:10px;padding:15px 18px;margin-top:11px}
+.stot-l{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)}
+.stot-a{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--blue)}
+
+/* Q */
+.qlist{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.qitem{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+.qnum{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);flex-shrink:0;margin-top:1px}
+.qtxt{font-size:13px;color:var(--muted2);line-height:1.55;font-weight:300}
+
+/* MOOD GRID */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:8px}
+.mcell{border-radius:10px;padding:14px;min-height:90px;display:flex;flex-direction:column;justify-content:space-between}
+.mclabel{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;opacity:0.6}
+.mcval{font-size:12px;line-height:1.5;font-weight:500}
+
+/* CAL */
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
+.calh{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-align:center;padding:5px 0}
+.cald{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:7px 6px;min-height:64px;font-size:10px;cursor:pointer;transition:all 0.15s}
+.cald:hover{border-color:rgba(79,195,247,0.3);background:var(--surface2)}
+.caldn{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:3px}
+.caldtxt{font-size:9px;color:var(--muted2);line-height:1.4}
+.caldtag{display:inline-block;font-size:7px;letter-spacing:1px;padding:2px 5px;border-radius:3px;margin-top:3px;font-family:'DM Mono',monospace}
+
+/* LOGO */
+.lcard{background:var(--surface);border:1px solid var(--border2);border-radius:13px;padding:20px;margin-bottom:12px}
+
+/* FOOTER */
+footer{margin-left:72px;border-top:1px solid var(--border2);padding:18px 48px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.ft-brand{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--blue)}
+.ft-tag{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:3px;margin-top:2px}
+.ft-r{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.08);letter-spacing:2px;text-align:right}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp 0.45s ease forwards}
+
+@media(max-width:768px){
+  .sidebar{width:56px}.main{margin-left:56px}footer{margin-left:56px}
+  .home-hero{padding:44px 18px 36px}.tool-page{padding:24px 18px 60px}
+  .tg-wrap{padding:24px 18px}.frow{grid-template-columns:1fr}.rgrid{grid-template-columns:1fr}
+  .topbar{padding:0 14px}.home-stats{gap:20px}.mgrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div><div class="orb orb2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo" onclick="showHome()">P</div>
+  <div class="sidebar-tools">
+    <div class="sdiv"></div><div class="scat">Design</div>
+    <button class="stool" onclick="showTool('palette')"><span class="stool-icon">🎨</span><span class="stool-label">Palette</span><span class="tip">Color Palette Generator</span></button>
+    <button class="stool" onclick="showTool('fonts')"><span class="stool-icon">Ag</span><span class="stool-label">Fonts</span><span class="tip">Font Pairing Engine</span></button>
+    <button class="stool" onclick="showTool('brief')"><span class="stool-icon">📋</span><span class="stool-label">Brief</span><span class="tip">Brief Builder</span></button>
+    <button class="stool" onclick="showTool('critique')"><span class="stool-icon">◎</span><span class="stool-label">Critic</span><span class="tip">Design Critic</span></button>
+    <button class="stool" onclick="showTool('mood')"><span class="stool-icon">🖼</span><span class="stool-label">Mood</span><span class="tip">Mood Board Director</span></button>
+    <button class="stool" onclick="showTool('logo')"><span class="stool-icon">✦</span><span class="stool-label">Logo</span><span class="tip">Logo Concept Generator</span></button>
+    <button class="stool" onclick="showTool('voice')"><span class="stool-icon">🎤</span><span class="stool-label">Voice</span><span class="tip">Brand Voice Analyzer</span></button>
+    <div class="sdiv"></div><div class="scat">Client</div>
+    <button class="stool" onclick="showTool('proposal')"><span class="stool-icon">📄</span><span class="stool-label">Proposal</span><span class="tip">Client Proposal Generator</span></button>
+    <button class="stool" onclick="showTool('invoice')"><span class="stool-icon">💰</span><span class="stool-label">Invoice</span><span class="tip">Invoice Generator</span></button>
+    <button class="stool" onclick="showTool('scope')"><span class="stool-icon">📐</span><span class="stool-label">Scope</span><span class="tip">Scope Calculator</span></button>
+    <button class="stool" onclick="showTool('questionnaire')"><span class="stool-icon">❓</span><span class="stool-label">Q&amp;A</span><span class="tip">Client Questionnaire</span></button>
+    <button class="stool" onclick="showTool('translator')"><span class="stool-icon">🔄</span><span class="stool-label">Decode</span><span class="tip">Client Language Translator</span></button>
+    <div class="sdiv"></div><div class="scat">Content</div>
+    <button class="stool" onclick="showTool('captions')"><span class="stool-icon">✍️</span><span class="stool-label">Captions</span><span class="tip">Caption Writer</span></button>
+    <button class="stool" onclick="showTool('calendar')"><span class="stool-icon">📅</span><span class="stool-label">Calendar</span><span class="tip">Content Calendar</span></button>
+    <button class="stool" onclick="showTool('hashtags')"><span class="stool-icon">#</span><span class="stool-label">Tags</span><span class="tip">Hashtag Strategist</span></button>
+    <button class="stool" onclick="showTool('hooks')"><span class="stool-icon">🪝</span><span class="stool-label">Hooks</span><span class="tip">Hook Generator</span></button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px"><div class="tb-brand">PixelMind</div><div class="tb-badge">PRO SUITE</div></div>
+    <div class="tb-center"><div class="tb-dot"></div><span id="cur-tool">DASHBOARD</span></div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px">16 TOOLS</div>
+  </div>
+
+  <!-- HOME -->
+  <div id="home">
+    <div class="home-hero">
+      <div class="eyebrow">Professional Design Suite · BleuDreams™</div>
+      <div class="home-title">EVERY TOOL<br/>A DESIGNER<br/><span>NEEDS.</span></div>
+      <div class="home-sub">16 AI-powered tools across design, client management, and content. Built exclusively for graphic designers who are serious about their craft and their business.</div>
+      <div class="home-stats">
+        <div><div class="hs-n">16</div><div class="hs-l">TOOLS</div></div>
+        <div><div class="hs-n">3</div><div class="hs-l">CATEGORIES</div></div>
+        <div><div class="hs-n">$97</div><div class="hs-l">ONE-TIME</div></div>
+      </div>
+    </div>
+    <div class="tg-wrap">
+      <span class="tg-cat-label">DESIGN TOOLS</span>
+      <div class="tg-grid">
+        <div class="tgc" style="--cc:#4FC3F7" onclick="showTool('palette')"><div class="tgc-icon">🎨</div><div class="tgc-name">Color Palette</div><div class="tgc-desc">Mood to 5-color system with rationale</div><div class="tgc-tag">Design</div></div>
+        <div class="tgc" style="--cc:#8b5cf6" onclick="showTool('fonts')"><div class="tgc-icon">Ag</div><div class="tgc-name">Font Pairing</div><div class="tgc-desc">3 curated pairings with live preview</div><div class="tgc-tag">Design</div></div>
+        <div class="tgc" style="--cc:#10b981" onclick="showTool('brief')"><div class="tgc-icon">📋</div><div class="tgc-name">Brief Builder</div><div class="tgc-desc">Complete brief in 60 seconds</div><div class="tgc-tag">Design</div></div>
+        <div class="tgc" style="--cc:#f59e0b" onclick="showTool('critique')"><div class="tgc-icon">◎</div><div class="tgc-name">Design Critic</div><div class="tgc-desc">Scored critique with fixes</div><div class="tgc-tag">Design</div></div>
+        <div class="tgc" style="--cc:#ec4899" onclick="showTool('mood')"><div class="tgc-icon">🖼</div><div class="tgc-name">Mood Board</div><div class="tgc-desc">Full direction from a concept</div><div class="tgc-tag">Design</div></div>
+        <div class="tgc" style="--cc:#4FC3F7" onclick="showTool('logo')"><div class="tgc-icon">✦</div><div class="tgc-name">Logo Concept</div><div class="tgc-desc">3 distinct concept routes</div><div class="tgc-tag">Design</div></div>
+        <div class="tgc" style="--cc:#8b5cf6" onclick="showTool('voice')"><div class="tgc-icon">🎤</div><div class="tgc-name">Brand Voice</div><div class="tgc-desc">Voice profile with dos and don'ts</div><div class="tgc-tag">Design</div></div>
+      </div>
+      <span class="tg-cat-label">CLIENT TOOLS</span>
+      <div class="tg-grid">
+        <div class="tgc" style="--cc:#10b981" onclick="showTool('proposal')"><div class="tgc-icon">📄</div><div class="tgc-name">Client Proposal</div><div class="tgc-desc">Pitch-ready proposal in minutes</div><div class="tgc-tag">Client</div></div>
+        <div class="tgc" style="--cc:#f59e0b" onclick="showTool('invoice')"><div class="tgc-icon">💰</div><div class="tgc-name">Invoice Generator</div><div class="tgc-desc">Professional invoice ready to send</div><div class="tgc-tag">Client</div></div>
+        <div class="tgc" style="--cc:#ec4899" onclick="showTool('scope')"><div class="tgc-icon">📐</div><div class="tgc-name">Scope Calculator</div><div class="tgc-desc">Scope and pricing breakdown</div><div class="tgc-tag">Client</div></div>
+        <div class="tgc" style="--cc:#4FC3F7" onclick="showTool('questionnaire')"><div class="tgc-icon">❓</div><div class="tgc-name">Questionnaire</div><div class="tgc-desc">Custom discovery questions</div><div class="tgc-tag">Client</div></div>
+        <div class="tgc" style="--cc:#8b5cf6" onclick="showTool('translator')"><div class="tgc-icon">🔄</div><div class="tgc-name">Client Translator</div><div class="tgc-desc">Decode what clients actually mean</div><div class="tgc-tag">Client</div></div>
+      </div>
+      <span class="tg-cat-label">CONTENT TOOLS</span>
+      <div class="tg-grid">
+        <div class="tgc" style="--cc:#10b981" onclick="showTool('captions')"><div class="tgc-icon">✍️</div><div class="tgc-name">Caption Writer</div><div class="tgc-desc">4-platform captions that stop scrolls</div><div class="tgc-tag">Content</div></div>
+        <div class="tgc" style="--cc:#f59e0b" onclick="showTool('calendar')"><div class="tgc-icon">📅</div><div class="tgc-name">Content Calendar</div><div class="tgc-desc">30-day plan for any brand</div><div class="tgc-tag">Content</div></div>
+        <div class="tgc" style="--cc:#ec4899" onclick="showTool('hashtags')"><div class="tgc-icon">#</div><div class="tgc-name">Hashtag Strategist</div><div class="tgc-desc">Tiered strategy that reaches people</div><div class="tgc-tag">Content</div></div>
+        <div class="tgc" style="--cc:#4FC3F7" onclick="showTool('hooks')"><div class="tgc-icon">🪝</div><div class="tgc-name">Hook Generator</div><div class="tgc-desc">First lines that stop mid-scroll</div><div class="tgc-tag">Content</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PALETTE -->
+  <div class="tool-page" id="tool-palette">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">COLOR<br/><span>PALETTE</span></div>
+    <div class="tp-desc">Describe a feeling — not a color. Get a 5-color system built around emotional intent, with roles, hex codes, and rationale.</div>
+    <div class="field"><label class="fl">MOOD / EMOTIONAL INTENT</label><input type="text" id="p-mood" placeholder='"Quiet luxury with an edge of danger" · "Havana at golden hour" · "A storm before it starts"' onkeydown="if(event.key==='Enter')run('palette')"/></div>
+    <div class="frow"><div class="field"><label class="fl">INDUSTRY</label><input type="text" id="p-ind" placeholder="e.g. luxury fashion, wellness, tech" onkeydown="if(event.key==='Enter')run('palette')"/></div><div class="field"><label class="fl">AVOID</label><input type="text" id="p-av" placeholder="e.g. pastels, corporate blues" onkeydown="if(event.key==='Enter')run('palette')"/></div></div>
+    <button class="go" onclick="run('palette')" id="palette-btn">Generate Palette <span class="go-arr">→</span></button>
+    <div class="loader" id="palette-load"><div class="lbar"><div class="lfill"></div></div>Building your color system…</div>
+    <div class="err" id="palette-err"></div><div id="palette-result"></div>
+  </div>
+
+  <!-- FONTS -->
+  <div class="tool-page" id="tool-fonts">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">FONT<br/><span>PAIRING</span></div>
+    <div class="tp-desc">Describe your brand. Get 3 curated pairings with psychological reasoning, creative tension, and a live specimen so you can see it before you commit.</div>
+    <div class="field"><label class="fl">DESCRIBE YOUR BRAND</label><input type="text" id="f-brand" placeholder='"Rebellious luxury streetwear for women over 40" · "Solo law firm that means business"' onkeydown="if(event.key==='Enter')run('fonts')"/></div>
+    <div class="field"><label class="fl">WHAT THIS BRAND SHOULD NEVER FEEL LIKE</label><input type="text" id="f-av" placeholder="e.g. corporate, generic, childish" onkeydown="if(event.key==='Enter')run('fonts')"/></div>
+    <button class="go" onclick="run('fonts')" id="fonts-btn">Get Pairings <span class="go-arr">→</span></button>
+    <div class="loader" id="fonts-load"><div class="lbar"><div class="lfill"></div></div>Finding your perfect type…</div>
+    <div class="err" id="fonts-err"></div><div id="fonts-result"></div>
+  </div>
+
+  <!-- BRIEF -->
+  <div class="tool-page" id="tool-brief">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">BRIEF<br/><span>BUILDER</span></div>
+    <div class="tp-desc">Two inputs. Complete professional brief. Scope creep stopped before it starts.</div>
+    <div class="frow"><div class="field"><label class="fl">PROJECT TYPE</label><input type="text" id="b-proj" placeholder="e.g. Brand identity for a luxury streetwear label" onkeydown="if(event.key==='Enter')run('brief')"/></div><div class="field"><label class="fl">CLIENT / BRAND</label><input type="text" id="b-client" placeholder="Client or brand name" onkeydown="if(event.key==='Enter')run('brief')"/></div></div>
+    <div class="field"><label class="fl">ADDITIONAL CONTEXT</label><input type="text" id="b-ctx" placeholder="Budget, existing assets, constraints" onkeydown="if(event.key==='Enter')run('brief')"/></div>
+    <button class="go" onclick="run('brief')" id="brief-btn">Build Brief <span class="go-arr">→</span></button>
+    <div class="loader" id="brief-load"><div class="lbar"><div class="lfill"></div></div>Writing your brief…</div>
+    <div class="err" id="brief-err"></div><div id="brief-result"></div>
+  </div>
+
+  <!-- CRITIQUE -->
+  <div class="tool-page" id="tool-critique">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">DESIGN<br/><span>CRITIC</span></div>
+    <div class="tp-desc">Describe your design. Get the truth — scored, specific, actionable. No sugarcoating.</div>
+    <div class="field"><label class="fl">DESCRIBE YOUR DESIGN IN DETAIL</label><textarea id="c-design" placeholder="Layout, colors, typography, imagery, spacing, hierarchy — the more detail, the more useful."></textarea></div>
+    <div class="field"><label class="fl">WHAT IS THIS DESIGN FOR?</label><input type="text" id="c-ctx" placeholder="e.g. Landing page for a Gen Z fashion brand" onkeydown="if(event.key==='Enter')run('critique')"/></div>
+    <button class="go" onclick="run('critique')" id="critique-btn">Get the Truth <span class="go-arr">→</span></button>
+    <div class="loader" id="critique-load"><div class="lbar"><div class="lfill"></div></div>Analysing your design…</div>
+    <div class="err" id="critique-err"></div><div id="critique-result"></div>
+  </div>
+
+  <!-- MOOD -->
+  <div class="tool-page" id="tool-mood">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">MOOD BOARD<br/><span>DIRECTOR</span></div>
+    <div class="tp-desc">Describe a concept. Get a complete mood board direction — palette, typography, imagery, textures, references, and the feeling you're building toward.</div>
+    <div class="field"><label class="fl">BRAND OR PROJECT CONCEPT</label><textarea id="m-concept" placeholder="Describe the brand, project, or feeling you're designing for."></textarea></div>
+    <div class="frow"><div class="field"><label class="fl">INDUSTRY</label><input type="text" id="m-ind" placeholder="e.g. luxury beauty, streetwear"/></div><div class="field"><label class="fl">TARGET AUDIENCE</label><input type="text" id="m-aud" placeholder="e.g. women 35-55, design-aware"/></div></div>
+    <button class="go" onclick="run('mood')" id="mood-btn">Build Direction <span class="go-arr">→</span></button>
+    <div class="loader" id="mood-load"><div class="lbar"><div class="lfill"></div></div>Curating your mood board…</div>
+    <div class="err" id="mood-err"></div><div id="mood-result"></div>
+  </div>
+
+  <!-- LOGO -->
+  <div class="tool-page" id="tool-logo">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">LOGO<br/><span>CONCEPT</span></div>
+    <div class="tp-desc">Brand name and description in. Three distinct logo concept routes out — with rationale, style direction, and what each one is saying.</div>
+    <div class="field"><label class="fl">BRAND NAME</label><input type="text" id="l-name" placeholder="e.g. PixelMind" onkeydown="if(event.key==='Enter')run('logo')"/></div>
+    <div class="field"><label class="fl">WHAT THIS BRAND DOES & STANDS FOR</label><textarea id="l-desc" placeholder="Describe the brand, values, audience, and what it should feel like."></textarea></div>
+    <div class="field"><label class="fl">STYLE DIRECTION (OPTIONAL)</label><input type="text" id="l-style" placeholder="e.g. minimal, geometric, wordmark only, hand-drawn" onkeydown="if(event.key==='Enter')run('logo')"/></div>
+    <button class="go" onclick="run('logo')" id="logo-btn">Generate Concepts <span class="go-arr">→</span></button>
+    <div class="loader" id="logo-load"><div class="lbar"><div class="lfill"></div></div>Developing concept routes…</div>
+    <div class="err" id="logo-err"></div><div id="logo-result"></div>
+  </div>
+
+  <!-- VOICE -->
+  <div class="tool-page" id="tool-voice">
+    <div class="tp-eyebrow">Design · PixelMind™</div>
+    <div class="tp-title">BRAND<br/><span>VOICE</span></div>
+    <div class="tp-desc">Define your brand's voice completely. Traits, dos and don'ts, and sample copy written in that voice.</div>
+    <div class="field"><label class="fl">BRAND DESCRIPTION</label><textarea id="v-brand" placeholder="What it does, who it's for, what it stands for, what it should sound like."></textarea></div>
+    <div class="field"><label class="fl">EXISTING COPY (OPTIONAL)</label><textarea id="v-copy" placeholder="Paste taglines, captions, or website copy to analyze the current voice." style="min-height:70px"></textarea></div>
+    <button class="go" onclick="run('voice')" id="voice-btn">Analyze Voice <span class="go-arr">→</span></button>
+    <div class="loader" id="voice-load"><div class="lbar"><div class="lfill"></div></div>Defining your brand voice…</div>
+    <div class="err" id="voice-err"></div><div id="voice-result"></div>
+  </div>
+
+  <!-- PROPOSAL -->
+  <div class="tool-page" id="tool-proposal">
+    <div class="tp-eyebrow">Client · PixelMind™</div>
+    <div class="tp-title">CLIENT<br/><span>PROPOSAL</span></div>
+    <div class="tp-desc">Fill in the details. Get a complete, professional proposal ready to send.</div>
+    <div class="frow"><div class="field"><label class="fl">YOUR NAME / STUDIO</label><input type="text" id="pr-you" placeholder="Your name or studio"/></div><div class="field"><label class="fl">CLIENT NAME</label><input type="text" id="pr-client" placeholder="Client name"/></div></div>
+    <div class="field"><label class="fl">PROJECT DESCRIPTION</label><textarea id="pr-proj" placeholder="Describe the project scope, deliverables, and requirements."></textarea></div>
+    <div class="frow"><div class="field"><label class="fl">TOTAL INVESTMENT</label><input type="text" id="pr-price" placeholder="e.g. $3,500" onkeydown="if(event.key==='Enter')run('proposal')"/></div><div class="field"><label class="fl">TIMELINE</label><input type="text" id="pr-time" placeholder="e.g. 4 weeks" onkeydown="if(event.key==='Enter')run('proposal')"/></div></div>
+    <button class="go" onclick="run('proposal')" id="proposal-btn">Generate Proposal <span class="go-arr">→</span></button>
+    <div class="loader" id="proposal-load"><div class="lbar"><div class="lfill"></div></div>Writing your proposal…</div>
+    <div class="err" id="proposal-err"></div><div id="proposal-result"></div>
+  </div>
+
+  <!-- INVOICE -->
+  <div class="tool-page" id="tool-invoice">
+    <div class="tp-eyebrow">Client · PixelMind™</div>
+    <div class="tp-title">INVOICE<br/><span>GENERATOR</span></div>
+    <div class="tp-desc">Professional invoice ready to send in seconds.</div>
+    <div class="frow"><div class="field"><label class="fl">YOUR NAME / STUDIO</label><input type="text" id="inv-you" placeholder="Your name or studio"/></div><div class="field"><label class="fl">CLIENT NAME</label><input type="text" id="inv-client" placeholder="Client name"/></div></div>
+    <div class="field"><label class="fl">SERVICES / LINE ITEMS (ONE PER LINE)</label><textarea id="inv-items" placeholder="Brand identity design — $2,000&#10;Logo variations — $500&#10;Brand guidelines — $750"></textarea></div>
+    <div class="frow"><div class="field"><label class="fl">DUE DATE</label><input type="text" id="inv-due" placeholder="e.g. Net 14, December 15"/></div><div class="field"><label class="fl">PAYMENT METHOD</label><input type="text" id="inv-pay" placeholder="e.g. Venmo @name, PayPal"/></div></div>
+    <button class="go" onclick="run('invoice')" id="invoice-btn">Generate Invoice <span class="go-arr">→</span></button>
+    <div class="loader" id="invoice-load"><div class="lbar"><div class="lfill"></div></div>Building your invoice…</div>
+    <div class="err" id="invoice-err"></div><div id="invoice-result"></div>
+  </div>
+
+  <!-- SCOPE -->
+  <div class="tool-page" id="tool-scope">
+    <div class="tp-eyebrow">Client · PixelMind™</div>
+    <div class="tp-title">SCOPE<br/><span>CALCULATOR</span></div>
+    <div class="tp-desc">Describe the project. Get a full scope breakdown with time estimates and suggested pricing per deliverable.</div>
+    <div class="field"><label class="fl">PROJECT TYPE & DELIVERABLES</label><textarea id="sc-proj" placeholder="Describe everything included. List all deliverables you're aware of."></textarea></div>
+    <div class="frow"><div class="field"><label class="fl">YOUR HOURLY RATE</label><input type="text" id="sc-rate" placeholder="e.g. $85/hr"/></div><div class="field"><label class="fl">EXPERIENCE LEVEL</label><select id="sc-lvl"><option value="junior">Junior (1-3 years)</option><option value="mid" selected>Mid-level (3-6 years)</option><option value="senior">Senior (6+ years)</option></select></div></div>
+    <button class="go" onclick="run('scope')" id="scope-btn">Calculate Scope <span class="go-arr">→</span></button>
+    <div class="loader" id="scope-load"><div class="lbar"><div class="lfill"></div></div>Breaking down your scope…</div>
+    <div class="err" id="scope-err"></div><div id="scope-result"></div>
+  </div>
+
+  <!-- QUESTIONNAIRE -->
+  <div class="tool-page" id="tool-questionnaire">
+    <div class="tp-eyebrow">Client · PixelMind™</div>
+    <div class="tp-title">CLIENT<br/><span>QUESTIONNAIRE</span></div>
+    <div class="tp-desc">Get the right questions before work starts. Customized for your exact project type and client situation.</div>
+    <div class="field"><label class="fl">PROJECT TYPE</label><input type="text" id="q-proj" placeholder="e.g. Brand identity, website redesign, packaging" onkeydown="if(event.key==='Enter')run('questionnaire')"/></div>
+    <div class="frow"><div class="field"><label class="fl">CLIENT INDUSTRY</label><input type="text" id="q-ind" placeholder="e.g. fashion, restaurant, tech startup"/></div><div class="field"><label class="fl">ANYTHING SPECIFIC TO UNCOVER</label><input type="text" id="q-spec" placeholder="e.g. unclear budget, bad past experiences"/></div></div>
+    <button class="go" onclick="run('questionnaire')" id="questionnaire-btn">Build Questions <span class="go-arr">→</span></button>
+    <div class="loader" id="questionnaire-load"><div class="lbar"><div class="lfill"></div></div>Building your questionnaire…</div>
+    <div class="err" id="questionnaire-err"></div><div id="questionnaire-result"></div>
+  </div>
+
+  <!-- TRANSLATOR -->
+  <div class="tool-page" id="tool-translator">
+    <div class="tp-eyebrow">Client · PixelMind™</div>
+    <div class="tp-title">CLIENT<br/><span>TRANSLATOR</span></div>
+    <div class="tp-desc">"Make it pop" is not design direction. Paste what your client said. Get what they actually mean — and what to do about it.</div>
+    <div class="field"><label class="fl">PASTE THEIR EXACT WORDS</label><textarea id="t-fb" placeholder="Paste the exact feedback — even if it makes no sense."></textarea></div>
+    <div class="field"><label class="fl">WHAT IS THE DESIGN FOR?</label><input type="text" id="t-ctx" placeholder="e.g. Logo for a wellness brand, landing page for a fashion label" onkeydown="if(event.key==='Enter')run('translator')"/></div>
+    <button class="go" onclick="run('translator')" id="translator-btn">Translate It <span class="go-arr">→</span></button>
+    <div class="loader" id="translator-load"><div class="lbar"><div class="lfill"></div></div>Decoding your client…</div>
+    <div class="err" id="translator-err"></div><div id="translator-result"></div>
+  </div>
+
+  <!-- CAPTIONS -->
+  <div class="tool-page" id="tool-captions">
+    <div class="tp-eyebrow">Content · PixelMind™</div>
+    <div class="tp-title">CAPTION<br/><span>WRITER</span></div>
+    <div class="tp-desc">Describe your post. Get scroll-stopping captions written separately for TikTok, Instagram, LinkedIn, and X.</div>
+    <div class="field"><label class="fl">WHAT IS THIS POST ABOUT?</label><textarea id="cap-topic" placeholder="Describe the post, what you're sharing, what you want people to do, and the vibe."></textarea></div>
+    <div class="frow"><div class="field"><label class="fl">YOUR BRAND VOICE</label><input type="text" id="cap-voice" placeholder="e.g. direct, confident, no fluff, real talk"/></div><div class="field"><label class="fl">CALL TO ACTION</label><input type="text" id="cap-cta" placeholder="e.g. link in bio, comment below, DM me"/></div></div>
+    <button class="go" onclick="run('captions')" id="captions-btn">Write Captions <span class="go-arr">→</span></button>
+    <div class="loader" id="captions-load"><div class="lbar"><div class="lfill"></div></div>Writing your captions…</div>
+    <div class="err" id="captions-err"></div><div id="captions-result"></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="tool-page" id="tool-calendar">
+    <div class="tp-eyebrow">Content · PixelMind™</div>
+    <div class="tp-title">CONTENT<br/><span>CALENDAR</span></div>
+    <div class="tp-desc">Your brand, your goal, your timeline — a full 30-day content plan with post themes and content types.</div>
+    <div class="field"><label class="fl">BRAND / PRODUCT YOU'RE PROMOTING</label><input type="text" id="cal-brand" placeholder="e.g. PixelMind™ AI design toolkit" onkeydown="if(event.key==='Enter')run('calendar')"/></div>
+    <div class="frow"><div class="field"><label class="fl">PRIMARY GOAL</label><select id="cal-goal"><option>Launch a new product</option><option>Build brand awareness</option><option>Drive sales</option><option>Grow following</option><option>Establish authority</option></select></div><div class="field"><label class="fl">PRIMARY PLATFORM</label><select id="cal-plat"><option>TikTok</option><option>Instagram</option><option>LinkedIn</option><option>All platforms</option></select></div></div>
+    <button class="go" onclick="run('calendar')" id="calendar-btn">Build Calendar <span class="go-arr">→</span></button>
+    <div class="loader" id="calendar-load"><div class="lbar"><div class="lfill"></div></div>Planning your content…</div>
+    <div class="err" id="calendar-err"></div><div id="calendar-result"></div>
+  </div>
+
+  <!-- HASHTAGS -->
+  <div class="tool-page" id="tool-hashtags">
+    <div class="tp-eyebrow">Content · PixelMind™</div>
+    <div class="tp-title">HASHTAG<br/><span>STRATEGIST</span></div>
+    <div class="tp-desc">Not just a list. A strategy. Tiered hashtag sets so you actually reach people at every level.</div>
+    <div class="field"><label class="fl">DESCRIBE YOUR CONTENT OR BRAND</label><input type="text" id="h-brand" placeholder="e.g. Graphic designer sharing brand identity work and tips" onkeydown="if(event.key==='Enter')run('hashtags')"/></div>
+    <div class="frow"><div class="field"><label class="fl">PLATFORM</label><select id="h-plat"><option>TikTok</option><option>Instagram</option><option>LinkedIn</option><option>All platforms</option></select></div><div class="field"><label class="fl">YOUR NICHE</label><input type="text" id="h-niche" placeholder="e.g. brand design, logo design, creative entrepreneur"/></div></div>
+    <button class="go" onclick="run('hashtags')" id="hashtags-btn">Build Strategy <span class="go-arr">→</span></button>
+    <div class="loader" id="hashtags-load"><div class="lbar"><div class="lfill"></div></div>Building your strategy…</div>
+    <div class="err" id="hashtags-err"></div><div id="hashtags-result"></div>
+  </div>
+
+  <!-- HOOKS -->
+  <div class="tool-page" id="tool-hooks">
+    <div class="tp-eyebrow">Content · PixelMind™</div>
+    <div class="tp-title">HOOK<br/><span>GENERATOR</span></div>
+    <div class="tp-desc">The first line is everything. Get 10 scroll-stopping hooks for any topic — ready to use on any platform.</div>
+    <div class="field"><label class="fl">WHAT IS YOUR POST OR VIDEO ABOUT?</label><textarea id="hk-topic" placeholder="Describe the topic, what you're teaching or sharing, and who it's for."></textarea></div>
+    <div class="frow"><div class="field"><label class="fl">PLATFORM</label><select id="hk-plat"><option>TikTok</option><option>Instagram</option><option>LinkedIn</option><option>All platforms</option></select></div><div class="field"><label class="fl">TONE</label><select id="hk-tone"><option>Direct and bold</option><option>Conversational</option><option>Provocative</option><option>Educational</option><option>Story-driven</option></select></div></div>
+    <button class="go" onclick="run('hooks')" id="hooks-btn">Generate Hooks <span class="go-arr">→</span></button>
+    <div class="loader" id="hooks-load"><div class="lbar"><div class="lfill"></div></div>Writing your hooks…</div>
+    <div class="err" id="hooks-err"></div><div id="hooks-result"></div>
+  </div>
+
+</main>
+
+<footer>
+  <div><div class="ft-brand">PIXELMIND™</div><div class="ft-tag">PRO SUITE · BLEUDREAMS™ · @EBABYBLUEDREAMS</div></div>
+  <div class="ft-r">STAY DIFFERENT. STAY GLOWING.<br/>© 2025 BLEUDREAMS™</div>
+</footer>
+
+<script>
+const TN={palette:'COLOR PALETTE',fonts:'FONT PAIRING',brief:'BRIEF BUILDER',critique:'DESIGN CRITIC',mood:'MOOD BOARD',logo:'LOGO CONCEPT',voice:'BRAND VOICE',proposal:'CLIENT PROPOSAL',invoice:'INVOICE',scope:'SCOPE CALCULATOR',questionnaire:'QUESTIONNAIRE',translator:'CLIENT TRANSLATOR',captions:'CAPTION WRITER',calendar:'CONTENT CALENDAR',hashtags:'HASHTAG STRATEGIST',hooks:'HOOK GENERATOR'};
+
+function showHome(){
+  document.getElementById('home').style.display='block';
+  document.querySelectorAll('.tool-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.stool').forEach(b=>b.classList.remove('active'));
+  document.getElementById('cur-tool').textContent='DASHBOARD';
+}
+function showTool(id){
+  document.getElementById('home').style.display='none';
+  document.querySelectorAll('.tool-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.stool').forEach(b=>b.classList.remove('active'));
+  const pg=document.getElementById('tool-'+id);
+  if(pg){pg.classList.add('active');pg.classList.add('fade-up')}
+  document.querySelectorAll('.stool').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'"))b.classList.add('active')});
+  document.getElementById('cur-tool').textContent=TN[id]||id.toUpperCase();
+}
+
+async function api(prompt,system){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system,messages:[{role:'user',content:prompt}]})});
+  const d=await r.json();return d.content?.[0]?.text||'';
+}
+function v(id){return(document.getElementById(id)||{}).value||''}
+function sl(id,on){document.getElementById(id+'-btn').disabled=on;document.getElementById(id+'-load').className='loader'+(on?' on':'');document.getElementById(id+'-err').textContent=''}
+function lm(h){const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;return 0.299*r+0.587*g+0.114*b}
+function pr(raw){return JSON.parse(raw.replace(/```json|```/g,'').trim())}
+function sr(id,html){document.getElementById(id+'-result').innerHTML=html}
+function cp(txt){navigator.clipboard&&navigator.clipboard.writeText(txt)}
+
+async function run(tool){
+  sl(tool,true);sr(tool,'');
+  try{
+    if(tool==='palette')await doPalette();
+    else if(tool==='fonts')await doFonts();
+    else if(tool==='brief')await doBrief();
+    else if(tool==='critique')await doCritique();
+    else if(tool==='mood')await doMood();
+    else if(tool==='logo')await doLogo();
+    else if(tool==='voice')await doVoice();
+    else if(tool==='proposal')await doProposal();
+    else if(tool==='invoice')await doInvoice();
+    else if(tool==='scope')await doScope();
+    else if(tool==='questionnaire')await doQ();
+    else if(tool==='translator')await doTranslator();
+    else if(tool==='captions')await doCaptions();
+    else if(tool==='calendar')await doCalendar();
+    else if(tool==='hashtags')await doHashtags();
+    else if(tool==='hooks')await doHooks();
+  }catch(e){document.getElementById(tool+'-err').textContent='Generation failed — try again.'}
+  sl(tool,false);
+}
+
+async function doPalette(){
+  const d=pr(await api(`Mood:"${v('p-mood')}". Industry:"${v('p-ind')||'any'}". Avoid:"${v('p-av')||'none'}".`,`Elite brand colorist. Bold, specific, no safe defaults.\nReturn ONLY valid JSON:\n{"title":"2-4 words","palette":[{"name":"string","hex":"#xxxxxx","role":"Primary|Secondary|Accent|Neutral|Base","emotion":"3-5 words","usage":"string"}],"story":"2 sentences creative director rationale"}`));
+  const sw=d.palette.map(c=>{const lt=lm(c.hex)>0.45,tc=lt?'rgba(0,0,0,0.65)':'rgba(255,255,255,0.8)';return`<div class="sw" style="background:${c.hex}" onclick="cp('${c.hex}')" title="Click to copy"><div><div class="sw-hex" style="color:${tc}">${c.hex}</div><div class="sw-role" style="color:${tc}">${c.role.toUpperCase()}</div></div></div>`;}).join('');
+  const grad=d.palette.map(c=>c.hex).join(',');
+  const usage=d.palette.map(c=>`<div class="rli"><div style="width:9px;height:9px;border-radius:50%;background:${c.hex};flex-shrink:0;margin-top:4px"></div><div class="rlt"><strong style="color:var(--muted2)">${c.name}</strong> — ${c.usage}</div></div>`).join('');
+  sr('palette',`<div class="result"><div class="rh"><span class="rh-label">PALETTE GENERATED</span><button class="cpbtn" onclick="cp('${d.palette.map(c=>c.hex).join(' ')}')">Copy All Hex</button></div><div class="rb"><span class="rl">PALETTE NAME</span><div class="rt">${d.title}</div><div class="swatches">${sw}</div><div class="gstrip" style="background:linear-gradient(to right,${grad})"></div><span class="rl">CREATIVE DIRECTION</span><p class="rtx" style="margin-bottom:14px">${d.story}</p><div class="rdiv"></div><span class="rl">USAGE GUIDE</span><div class="rlist" style="margin-top:8px">${usage}</div><p style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-top:12px;letter-spacing:1px">CLICK ANY SWATCH TO COPY HEX</p></div></div>`);
+}
+
+let FP=[],FAI=0;
+async function doFonts(){
+  const d=pr(await api(`Brand:"${v('f-brand')}". Never feel like:"${v('f-av')||'generic'}".`,`World-class typographer. 3 genuinely distinct pairings.\nReturn ONLY valid JSON:\n{"pairings":[{"display":"Google Font name","body":"Google Font name","tag":"2-3 words","why_display":"1 sentence","why_body":"1 sentence","tension":"1 sentence","use_case":"string"}]}`));
+  FP=d.pairings;renderFP(0);
+}
+function renderFP(i){
+  FAI=i;const p=FP[i];
+  const gf=`https://fonts.googleapis.com/css2?family=${p.display.replace(/ /g,'+')}:wght@400;700&family=${p.body.replace(/ /g,'+')}:wght@400&display=swap`;
+  if(!document.querySelector(`link[href="${gf}"]`)){const l=document.createElement('link');l.rel='stylesheet';l.href=gf;document.head.appendChild(l)}
+  const tabs=FP.map((fp,j)=>`<button class="ftab${j===i?' active':''}" onclick="renderFP(${j})">Option ${j+1}<span class="ftab-tag">${fp.tag}</span></button>`).join('');
+  sr('fonts',`<div class="result"><div class="rh"><span class="rh-label">FONT PAIRINGS GENERATED</span></div><div class="rb"><div class="ftabs">${tabs}</div><span class="rl">LIVE SPECIMEN</span><div class="spec-d" style="font-family:'${p.display}',serif">The Brand That Changed Everything</div><div class="spec-b" style="font-family:'${p.body}',sans-serif">Every great brand has a point of view the market feels before they can articulate it. Typography is how that enters the room before a word is read.</div><div class="rdiv"></div><div class="rgrid"><div class="ri"><label>DISPLAY — ${p.display}</label><p>${p.why_display}</p></div><div class="ri"><label>BODY — ${p.body}</label><p>${p.why_body}</p></div></div><div class="iconic" style="margin-top:12px"><span class="iconic-l">CREATIVE TENSION</span><div class="iconic-t">${p.tension}</div></div><p style="font-size:12px;color:var(--muted);margin-top:10px;font-weight:300">Best for: ${p.use_case}</p><p style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-top:7px;letter-spacing:1px">ALL GOOGLE FONTS — FREE TO USE</p></div></div>`);
+}
+
+async function doBrief(){
+  const d=pr(await api(`Project:"${v('b-proj')}". Client:"${v('b-client')||'unspecified'}". Context:"${v('b-ctx')||'none'}".`,`Senior creative director. Real direction, not vague language.\nReturn ONLY valid JSON:\n{"overview":"string","objectives":["string","string","string"],"audience":"string","tone":"string","deliverables":["string","string","string","string"],"constraints":"string","inspiration":"string","success":"string","timeline":"string"}`));
+  const objs=d.objectives.map((o,i)=>`<div class="rli"><span class="rln">0${i+1}</span><span class="rlt">${o}</span></div>`).join('');
+  const dels=d.deliverables.map(dl=>`<div class="rli"><span class="rln">→</span><span class="rlt">${dl}</span></div>`).join('');
+  sr('brief',`<div class="result"><div class="rh"><span class="rh-label">BRIEF GENERATED</span></div><div class="rb"><span class="rl">PROJECT OVERVIEW</span><p class="rtx" style="margin-bottom:18px">${d.overview}</p><div class="rgrid"><div class="ri"><label>OBJECTIVES</label><div class="rlist">${objs}</div></div><div class="ri"><label>DELIVERABLES</label><div class="rlist">${dels}</div></div></div><div class="rgrid" style="margin-top:12px"><div class="ri"><label>TARGET AUDIENCE</label><p>${d.audience}</p></div><div class="ri"><label>TONE & VOICE</label><p>${d.tone}</p></div><div class="ri"><label>CONSTRAINTS</label><p>${d.constraints}</p></div><div class="ri"><label>INSPIRATION DIRECTION</label><p>${d.inspiration}</p></div><div class="ri"><label>SUCCESS LOOKS LIKE</label><p>${d.success}</p></div><div class="ri"><label>TIMELINE</label><p>${d.timeline}</p></div></div></div></div>`);
+}
+
+async function doCritique(){
+  const d=pr(await api(`Design:"${v('c-design')}". Context:"${v('c-ctx')||'unspecified'}".`,`Legendary creative director. Honest. Specific. Never vague.\nReturn ONLY valid JSON:\n{"score":85,"verdict":"string","strengths":[{"point":"string","why":"string"},{"point":"string","why":"string"},{"point":"string","why":"string"}],"problems":[{"issue":"string","why":"string","fix":"string"},{"issue":"string","why":"string","fix":"string"},{"issue":"string","why":"string","fix":"string"}],"quick_wins":["string","string","string"],"iconic":"string"}`));
+  const sc=d.score>=80?'var(--green)':d.score>=60?'var(--gold)':'#f87171';
+  const str=d.strengths.map(s=>`<div class="str-r"><span class="str-i">✓</span><div><div class="str-p">${s.point}</div><div class="str-w">${s.why}</div></div></div>`).join('');
+  const prb=d.problems.map(p=>`<div class="pcard"><div class="pissue">${p.issue}</div><div class="pwhy">${p.why}</div><div class="fix-r"><span class="fix-l">FIX →</span><span class="fix-t">${p.fix}</span></div></div>`).join('');
+  const wins=d.quick_wins.map((q,i)=>`<div class="rli"><span class="rln">${i+1}.</span><span class="rlt">${q}</span></div>`).join('');
+  sr('critique',`<div class="result"><div class="rh"><span class="rh-label">CRITIQUE COMPLETE</span></div><div class="rb"><div style="display:flex;gap:18px;align-items:center;margin-bottom:18px"><div><div class="score-n" style="color:${sc}">${d.score}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px">/ 100</div></div><div style="font-size:15px;font-weight:700;color:var(--text);line-height:1.5;flex:1">${d.verdict}</div></div><div class="rdiv"></div><span class="rl" style="margin-bottom:10px;display:block">WHAT'S WORKING</span>${str}<div class="rdiv"></div><span class="rl" style="margin-bottom:10px;display:block">WHAT'S HURTING IT</span>${prb}<div class="rdiv"></div><span class="rl" style="margin-bottom:10px;display:block">QUICK WINS</span><div class="rlist">${wins}</div><div class="iconic"><span class="iconic-l">THE MOVE THAT MAKES IT ICONIC</span><div class="iconic-t">${d.iconic}</div></div></div></div>`);
+}
+
+async function doMood(){
+  const d=pr(await api(`Concept:"${v('m-concept')}". Industry:"${v('m-ind')||'any'}". Audience:"${v('m-aud')||'unspecified'}".`,`Expert creative director. Complete mood board direction.\nReturn ONLY valid JSON:\n{"title":"string","tagline":"string","palette":{"primary":"#hex","secondary":"#hex","accent":"#hex"},"typography":{"display":"string","body":"string","rationale":"string"},"imagery":["string","string","string"],"textures":["string","string"],"feeling":"string","references":["string","string","string"],"avoid":"string"}`));
+  const cols=[d.palette.primary,d.palette.secondary,d.palette.accent];
+  const clabels=['PRIMARY','SECONDARY','ACCENT'];
+  const mcells=cols.map((c,i)=>`<div class="mcell" style="background:${c}"><div class="mclabel" style="color:${lm(c)>0.5?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.5)'}">${clabels[i]}</div><div class="mcval" style="color:${lm(c)>0.5?'#000':'#fff'}">${c}</div></div>`).join('');
+  sr('mood',`<div class="result"><div class="rh"><span class="rh-label">MOOD BOARD DIRECTION</span></div><div class="rb"><span class="rl">CONCEPT TITLE</span><div class="rt">${d.title}</div><p class="rtx" style="font-style:italic;margin-bottom:18px">"${d.tagline}"</p><div class="mgrid">${mcells}</div><div class="rgrid" style="margin-top:14px"><div class="ri"><label>TYPOGRAPHY</label><p><strong style="color:var(--muted2)">${d.typography.display}</strong> + ${d.typography.body}<br/><span style="font-size:11px;margin-top:4px;display:block">${d.typography.rationale}</span></p></div><div class="ri"><label>THE FEELING</label><p>${d.feeling}</p></div><div class="ri"><label>IMAGERY DIRECTION</label><div class="rlist">${d.imagery.map(i=>`<div class="rli"><span class="rln">→</span><span class="rlt">${i}</span></div>`).join('')}</div></div><div class="ri"><label>TEXTURES</label><div class="rlist">${d.textures.map(t=>`<div class="rli"><span class="rln">→</span><span class="rlt">${t}</span></div>`).join('')}</div></div><div class="ri"><label>REFERENCES</label><div class="rlist">${d.references.map(r=>`<div class="rli"><span class="rln">◈</span><span class="rlt">${r}</span></div>`).join('')}</div></div><div class="ri"><label>AVOID</label><p>${d.avoid}</p></div></div></div></div>`);
+}
+
+async function doLogo(){
+  const d=pr(await api(`Brand:"${v('l-name')}". Description:"${v('l-desc')}". Style:"${v('l-style')||'open'}".`,`Award-winning brand identity designer. 3 genuinely distinct concept routes.\nReturn ONLY valid JSON:\n{"concepts":[{"name":"string","approach":"string","rationale":"string","style":"string","colors":"string","typography":"string","standout":"string"}]}`));
+  const cc=['var(--blue)','var(--purple)','var(--gold)'];
+  const cards=d.concepts.map((c,i)=>`<div class="lcard" style="border-top:2px solid ${cc[i]}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px"><div><div style="font-family:'DM Mono',monospace;font-size:9px;color:${cc[i]};letter-spacing:2px;margin-bottom:4px">CONCEPT 0${i+1}</div><div style="font-size:16px;font-weight:800">${c.name}</div></div><div style="font-family:'DM Mono',monospace;font-size:8px;background:rgba(255,255,255,0.05);border-radius:4px;padding:3px 9px;color:var(--muted)">${c.approach}</div></div><div class="rgrid"><div class="ri"><label>RATIONALE</label><p>${c.rationale}</p></div><div class="ri"><label>VISUAL STYLE</label><p>${c.style}</p></div><div class="ri"><label>COLOR DIRECTION</label><p>${c.colors}</p></div><div class="ri"><label>TYPOGRAPHY</label><p>${c.typography}</p></div></div><div class="iconic" style="margin-top:10px;border-color:${cc[i]}40"><span class="iconic-l">WHAT MAKES THIS DIFFERENT</span><div class="iconic-t" style="color:${cc[i]}">${c.standout}</div></div></div>`).join('');
+  sr('logo',`<div class="result"><div class="rh"><span class="rh-label">3 LOGO CONCEPT ROUTES</span></div><div class="rb">${cards}</div></div>`);
+}
+
+async function doVoice(){
+  const d=pr(await api(`Brand:"${v('v-brand')}". Existing copy:"${v('v-copy')||'none'}".`,`Expert brand strategist. Define this voice completely.\nReturn ONLY valid JSON:\n{"voice_name":"string","description":"string","traits":[{"name":"string","score":75,"desc":"string"}],"dos":["string","string","string","string"],"donts":["string","string","string","string"],"sample":{"tagline":"string","caption":"string","bio":"string"}}`));
+  const traits=d.traits.map(t=>`<div class="vtrait"><div class="vtl">${t.name.toUpperCase()}</div><div class="vbar"><div class="vfill" style="width:${t.score}%"></div></div><div class="vval">${t.score}</div></div>`).join('');
+  const dos=d.dos.map(x=>`<div class="rli"><span class="rln" style="color:var(--green)">✓</span><span class="rlt">${x}</span></div>`).join('');
+  const donts=d.donts.map(x=>`<div class="rli"><span class="rln" style="color:#f87171">✗</span><span class="rlt">${x}</span></div>`).join('');
+  sr('voice',`<div class="result"><div class="rh"><span class="rh-label">BRAND VOICE PROFILE</span></div><div class="rb"><span class="rl">VOICE NAME</span><div class="rt">${d.voice_name}</div><p class="rtx" style="margin-bottom:18px">${d.description}</p><span class="rl">VOICE TRAITS</span><div style="margin:10px 0 18px">${traits}</div><div class="rdiv"></div><div class="rgrid"><div class="ri"><label style="color:var(--green)">DOS</label><div class="rlist">${dos}</div></div><div class="ri"><label style="color:#f87171">DON'TS</label><div class="rlist">${donts}</div></div></div><div class="rdiv"></div><span class="rl">SAMPLE COPY IN THIS VOICE</span><div class="rgrid" style="margin-top:10px"><div class="ri"><label>TAGLINE</label><p style="font-weight:700;color:var(--text);font-size:14px">${d.sample.tagline}</p></div><div class="ri"><label>BIO</label><p>${d.sample.bio}</p></div><div class="ri" style="grid-column:span 2"><label>CAPTION</label><p>${d.sample.caption}</p></div></div></div></div>`);
+}
+
+async function doProposal(){
+  const d=pr(await api(`Designer:"${v('pr-you')}". Client:"${v('pr-client')}". Project:"${v('pr-proj')}". Price:"${v('pr-price')}". Timeline:"${v('pr-time')}".`,`Senior creative professional. Winning proposal, professional but warm.\nReturn ONLY valid JSON:\n{"intro":"string","understanding":"string","approach":"string","deliverables":["string","string","string","string"],"process":["string","string","string"],"terms":["string","string","string"],"closing":"string"}`));
+  const dels=d.deliverables.map(dl=>`<tr><td>→ ${dl}</td></tr>`).join('');
+  const proc=d.process.map((p,i)=>`<tr><td style="font-weight:700;color:#0d5a80">Phase ${i+1}</td><td>${p}</td></tr>`).join('');
+  sr('proposal',`<div class="result"><div class="rh"><span class="rh-label">PROPOSAL GENERATED</span><button class="cpbtn" onclick="window.print()">Print / PDF</button></div><div class="rb"><div class="doc"><div class="doch"><div><div class="doct">PROPOSAL</div><div class="docbr">PIXELMIND™ · BLEUDREAMS™</div></div><div style="text-align:right;font-size:12px;color:var(--muted2)"><strong>${v('pr-you')}</strong><br/>For: ${v('pr-client')}<br/>${new Date().toLocaleDateString()}</div></div><div class="docs"><div class="docsl">Introduction</div><div class="docb">${d.intro}</div></div><div class="docs"><div class="docsl">Understanding Your Needs</div><div class="docb">${d.understanding}</div></div><div class="docs"><div class="docsl">Our Approach</div><div class="docb">${d.approach}</div></div><div class="docs"><div class="docsl">Deliverables</div><table class="doctbl"><thead><tr><th>Included</th></tr></thead><tbody>${dels}</tbody></table></div><div class="docs"><div class="docsl">Process</div><table class="doctbl"><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>${proc}</tbody></table></div><div class="doctot"><span class="doctot-l">TOTAL INVESTMENT · ${v('pr-time')}</span><span class="doctot-a">${v('pr-price')}</span></div><div class="docs" style="margin-top:14px"><div class="docsl">Terms</div><div class="docb">${d.terms.map((t,i)=>`${i+1}. ${t}`).join('<br/>')}</div></div><div class="docs"><div class="docsl">Next Steps</div><div class="docb">${d.closing}</div></div></div></div></div>`);
+}
+
+async function doInvoice(){
+  const items=v('inv-items').split('\n').filter(l=>l.trim());
+  const d=pr(await api(`Designer:"${v('inv-you')}". Client:"${v('inv-client')}". Items:${JSON.stringify(items)}. Due:"${v('inv-due')}". Payment:"${v('inv-pay')}".`,`Professional invoice generator.\nReturn ONLY valid JSON:\n{"invoice_num":"INV-001","items":[{"description":"string","amount":"string"}],"subtotal":"string","total":"string","notes":"string"}`));
+  const rows=d.items.map(it=>`<tr><td>${it.description}</td><td style="text-align:right;font-weight:600">${it.amount}</td></tr>`).join('');
+  sr('invoice',`<div class="result"><div class="rh"><span class="rh-label">INVOICE GENERATED</span><button class="cpbtn" onclick="window.print()">Print / PDF</button></div><div class="rb"><div class="doc"><div class="doch"><div><div class="doct">INVOICE</div><div class="docbr">${d.invoice_num}</div></div><div style="text-align:right;font-size:12px;color:var(--muted2)"><strong>${v('inv-you')}</strong><br/>Bill to: ${v('inv-client')}<br/>${new Date().toLocaleDateString()}</div></div><table class="doctbl"><thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}<tr style="background:rgba(79,195,247,0.08)"><td style="font-weight:700">Subtotal</td><td style="text-align:right;font-weight:700">${d.subtotal}</td></tr></tbody></table><div class="doctot"><span class="doctot-l">TOTAL DUE · ${v('inv-due')}</span><span class="doctot-a">${d.total}</span></div><div style="margin-top:14px;font-size:12px;color:var(--muted2)"><strong>Payment:</strong> ${v('inv-pay')}<br/><br/>${d.notes}</div></div></div></div>`);
+}
+
+async function doScope(){
+  const d=pr(await api(`Project:"${v('sc-proj')}". Rate:"${v('sc-rate')||'$75/hr'}". Level:"${v('sc-lvl')}".`,`Expert project manager. Break down scope realistically, don't underestimate.\nReturn ONLY valid JSON:\n{"deliverables":[{"name":"string","hours":8,"notes":"string"}],"total_hours":30,"recommended_price":"string","buffer_note":"string","payment_structure":["string","string"]}`));
+  const rows=d.deliverables.map(dl=>`<tr><td>${dl.name}</td><td>${dl.hours} hrs</td><td style="color:var(--muted2);font-size:12px">${dl.notes}</td></tr>`).join('');
+  sr('scope',`<div class="result"><div class="rh"><span class="rh-label">SCOPE CALCULATED</span></div><div class="rb"><table class="stbl"><thead><tr><th>Deliverable</th><th>Hours</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table><div class="stot"><div><div class="stot-l">TOTAL HOURS</div><div style="font-size:13px;color:var(--muted2);margin-top:2px">${d.total_hours} hours</div></div><div class="stot-a">${d.recommended_price}</div></div><div class="ri" style="margin-top:12px"><label>⚠ BUFFER NOTE</label><p>${d.buffer_note}</p></div><div class="ri" style="margin-top:9px"><label>PAYMENT STRUCTURE</label><div class="rlist">${d.payment_structure.map((p,i)=>`<div class="rli"><span class="rln">0${i+1}</span><span class="rlt">${p}</span></div>`).join('')}</div></div></div></div>`);
+}
+
+async function doQ(){
+  const d=pr(await api(`Project:"${v('q-proj')}". Industry:"${v('q-ind')||'any'}". Specific:"${v('q-spec')||'none'}".`,`Expert creative strategist. Questions that uncover everything before design starts.\nReturn ONLY valid JSON:\n{"sections":[{"title":"string","questions":["string","string","string"]}]}`));
+  const sections=d.sections.map(s=>`<div style="margin-bottom:18px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:3px;margin-bottom:9px">${s.title.toUpperCase()}</div><div class="qlist">${s.questions.map((q,i)=>`<div class="qitem"><span class="qnum">Q${i+1}</span><span class="qtxt">${q}</span></div>`).join('')}</div></div>`).join('');
+  sr('questionnaire',`<div class="result"><div class="rh"><span class="rh-label">QUESTIONNAIRE GENERATED</span></div><div class="rb">${sections}</div></div>`);
+}
+
+async function doTranslator(){
+  const d=pr(await api(`Feedback:"${v('t-fb')}". Context:"${v('t-ctx')||'unspecified'}".`,`Expert creative director. Decode client language into design direction.\nReturn ONLY valid JSON:\n{"reacting_to":"string","want_instead":"string","changes":["string","string","string"],"reply":"string"}`));
+  sr('translator',`<div class="result"><div class="rh"><span class="rh-label">CLIENT DECODED</span></div><div class="rb"><span class="rl">WHAT THEY'RE ACTUALLY REACTING TO</span><p class="rtx" style="margin-bottom:14px">${d.reacting_to}</p><span class="rl">WHAT THEY WANT INSTEAD</span><p class="rtx" style="margin-bottom:14px">${d.want_instead}</p><div class="rdiv"></div><span class="rl">THREE CONCRETE CHANGES</span><div class="rlist" style="margin-top:9px">${d.changes.map((c,i)=>`<div class="rli"><span class="rln">${i+1}.</span><span class="rlt">${c}</span></div>`).join('')}</div><div class="iconic" style="margin-top:14px"><span class="iconic-l">WHAT TO SAY BACK TO THEM</span><div class="iconic-t">${d.reply}</div></div></div></div>`);
+}
+
+async function doCaptions(){
+  const d=pr(await api(`Topic:"${v('cap-topic')}". Voice:"${v('cap-voice')||'direct and confident'}". CTA:"${v('cap-cta')||'link in bio'}".`,`Expert social media copywriter. Human, scroll-stopping, no AI openers.\nReturn ONLY valid JSON:\n{"tiktok":"string","instagram":"string","linkedin":"string","x":"string"}`));
+  const plats=[{n:'TIKTOK',k:'tiktok',c:'#fff',bg:'rgba(1,1,1,0.3)'},{n:'INSTAGRAM',k:'instagram',c:'#E1306C',bg:'rgba(225,48,108,0.1)'},{n:'LINKEDIN',k:'linkedin',c:'#0077B5',bg:'rgba(0,119,181,0.1)'},{n:'X / TWITTER',k:'x',c:'#fff',bg:'rgba(255,255,255,0.06)'}];
+  const cards=plats.map(p=>`<div class="cap-card"><span class="cap-plat" style="background:${p.bg};color:${p.c};border:1px solid ${p.c}40">${p.n}</span><span class="cap-text">${d[p.k]}</span><button class="cpbtn" onclick="cp(this.previousElementSibling.textContent)">Copy</button></div>`).join('');
+  sr('captions',`<div class="result"><div class="rh"><span class="rh-label">CAPTIONS GENERATED</span></div><div class="rb"><div class="cap-cards">${cards}</div></div></div>`);
+}
+
+async function doCalendar(){
+  const d=pr(await api(`Brand:"${v('cal-brand')}". Goal:"${v('cal-goal')}". Platform:"${v('cal-plat')}".`,`Expert content strategist. 30-day plan, every post purposeful.\nReturn ONLY valid JSON:\n{"theme":"string","weeks":[{"week":1,"focus":"string","posts":[{"day":1,"type":"string","topic":"string"},{"day":2,"type":"string","topic":"string"},{"day":3,"type":"string","topic":"string"},{"day":4,"type":"string","topic":"string"},{"day":5,"type":"string","topic":"string"},{"day":6,"type":"string","topic":"string"},{"day":7,"type":"string","topic":"string"}]},{"week":2,"focus":"string","posts":[{"day":8,"type":"string","topic":"string"},{"day":9,"type":"string","topic":"string"},{"day":10,"type":"string","topic":"string"},{"day":11,"type":"string","topic":"string"},{"day":12,"type":"string","topic":"string"},{"day":13,"type":"string","topic":"string"},{"day":14,"type":"string","topic":"string"}]}]}`));
+  const tc=['rgba(79,195,247,0.2)','rgba(139,92,246,0.2)','rgba(16,185,129,0.2)','rgba(245,158,11,0.2)','rgba(236,72,153,0.2)'];
+  const weeks=d.weeks.map(w=>`<div style="margin-bottom:24px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:3px;margin-bottom:8px">WEEK ${w.week} — ${w.focus.toUpperCase()}</div><div class="calgrid">${['MON','TUE','WED','THU','FRI','SAT','SUN'].map(h=>`<div class="calh">${h}</div>`).join('')}${w.posts.map((p,i)=>`<div class="cald"><div class="caldn">Day ${p.day}</div><div class="caldtxt">${p.topic}</div><div class="caldtag" style="background:${tc[i%5]};color:var(--text)">${p.type}</div></div>`).join('')}</div></div>`).join('');
+  sr('calendar',`<div class="result"><div class="rh"><span class="rh-label">CONTENT CALENDAR</span></div><div class="rb"><span class="rl">CONTENT THEME</span><div class="rt" style="margin-bottom:22px">${d.theme}</div>${weeks}</div></div>`);
+}
+
+async function doHashtags(){
+  const d=pr(await api(`Content:"${v('h-brand')}". Platform:"${v('h-plat')}". Niche:"${v('h-niche')||'general'}".`,`Expert social media strategist. Tiered hashtag strategy.\nReturn ONLY valid JSON:\n{"strategy":"string","sets":[{"tier":"Broad (1M+)","tags":["string","string","string"],"note":"string"},{"tier":"Mid (100K-1M)","tags":["string","string","string","string"],"note":"string"},{"tier":"Niche (<100K)","tags":["string","string","string","string","string"],"note":"string"}],"branded":["string","string"],"tip":"string"}`));
+  const tc=['#f87171','var(--gold)','var(--green)'];const tbg=['rgba(239,68,68,0.12)','rgba(245,158,11,0.12)','rgba(16,185,129,0.12)'];
+  const sets=d.sets.map((s,i)=>`<div style="margin-bottom:14px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:${tc[i]};letter-spacing:2px;margin-bottom:7px">${s.tier}</div><div class="hcloud">${s.tags.map(t=>`<div class="htag" style="background:${tbg[i]};color:${tc[i]};border-color:${tc[i]}30" onclick="cp('${(t.startsWith('#')?t:'#'+t)}')">${t.startsWith('#')?t:'#'+t}</div>`).join('')}</div><p style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic">${s.note}</p></div>`).join('');
+  sr('hashtags',`<div class="result"><div class="rh"><span class="rh-label">HASHTAG STRATEGY</span></div><div class="rb"><p class="rtx" style="margin-bottom:18px">${d.strategy}</p>${sets}<div class="rdiv"></div><span class="rl">BRANDED HASHTAGS</span><div class="hcloud" style="margin-top:9px">${d.branded.map(t=>`<div class="htag" style="background:rgba(79,195,247,0.1);color:var(--blue);border-color:rgba(79,195,247,0.3)" onclick="cp('${(t.startsWith('#')?t:'#'+t)}')">${t.startsWith('#')?t:'#'+t}</div>`).join('')}</div><div class="iconic" style="margin-top:14px"><span class="iconic-l">PRO TIP</span><div class="iconic-t">${d.tip}</div></div><p style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-top:10px;letter-spacing:1px">CLICK ANY HASHTAG TO COPY</p></div></div>`);
+}
+
+async function doHooks(){
+  const d=pr(await api(`Topic:"${v('hk-topic')}". Platform:"${v('hk-plat')}". Tone:"${v('hk-tone')}".`,`Expert copywriter. Hooks that stop scrolls cold. Human, punchy, never generic.\nReturn ONLY valid JSON:\n{"hooks":[{"type":"string","hook":"string"}]}`));
+  const cc=['var(--blue)','var(--purple)','var(--gold)','var(--green)','var(--pink)'];
+  const cards=d.hooks.map((h,i)=>`<div class="hcard" style="border-left-color:${cc[i%5]}"><span class="htype">${h.type.toUpperCase()}</span><div class="htext">${h.hook}</div><button class="cpbtn" style="margin-top:9px" onclick="cp('${h.hook.replace(/'/g,"\\'")}')">Copy Hook</button></div>`).join('');
+  sr('hooks',`<div class="result"><div class="rh"><span class="rh-label">${d.hooks.length} HOOKS GENERATED</span></div><div class="rb"><div class="hcards">${cards}</div></div></div>`);
+}
+</script>
+</body>
+</html>

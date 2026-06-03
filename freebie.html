@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Designer's Unfair Advantage — Free · PixelMind™</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;900&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #030c18;
+    --blue: #4FC3F7;
+    --dkblue: #0d5a80;
+    --border: rgba(79,195,247,0.15);
+    --text: #e8f4fd;
+    --muted: #4a7090;
+    --surface: rgba(255,255,255,0.03);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--navy); color: var(--text); font-family: 'DM Sans', sans-serif; }
+
+  /* NAV */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(3,12,24,0.9); backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg,#4FC3F7,#0d5a80);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px; color: var(--navy);
+  }
+  .logo-name { font-weight: 900; font-size: 15px; color: var(--text); }
+  .logo-sub { font-family: 'DM Mono', monospace; font-size: 8px; color: #2a5070; letter-spacing: 3px; }
+  .nav-btn {
+    background: var(--blue); color: var(--navy);
+    font-weight: 800; font-size: 11px; letter-spacing: 1px;
+    padding: 9px 20px; border-radius: 8px; text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center; padding: 80px 40px 60px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 400px; pointer-events: none;
+    background: radial-gradient(ellipse, rgba(79,195,247,0.08) 0%, transparent 70%);
+  }
+  .badge {
+    display: inline-block; font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 3px; color: #4a8aaa; border: 1px solid var(--border);
+    border-radius: 20px; padding: 5px 16px; margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px,5vw,64px); font-weight: 900;
+    letter-spacing: -2px; line-height: 1.05; margin-bottom: 8px;
+  }
+  .hero h1 span { color: var(--blue); }
+  .hero-sub {
+    font-size: clamp(16px,2vw,22px); font-weight: 700;
+    color: #8ab0c8; margin-bottom: 20px;
+  }
+  .hero-desc {
+    font-size: 15px; color: var(--muted); line-height: 1.75;
+    max-width: 520px; margin: 0 auto 36px;
+  }
+  .hero-free {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(79,195,247,0.08); border: 1px solid rgba(79,195,247,0.3);
+    border-radius: 14px; padding: 18px 40px; margin-bottom: 16px;
+  }
+  .free-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: #2a5878; }
+  .free-price { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 900; color: var(--blue); line-height: 1; }
+  .free-note { font-size: 12px; color: #4a7090; }
+
+  /* WHAT YOU GET */
+  .what { max-width: 860px; margin: 0 auto; padding: 80px 40px; }
+  .section-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 4px; color: var(--blue); display: block; margin-bottom: 20px; }
+  .what h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px,4vw,44px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 40px; }
+  .prompt-list { display: flex; flex-direction: column; gap: 12px; }
+  .prompt-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--surface); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 20px 22px; transition: all 0.2s;
+  }
+  .prompt-item:hover { border-color: rgba(79,195,247,0.3); background: rgba(79,195,247,0.04); }
+  .prompt-num { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--blue); flex-shrink: 0; margin-top: 2px; }
+  .prompt-info { flex: 1; }
+  .prompt-name { font-weight: 800; font-size: 15px; margin-bottom: 5px; }
+  .prompt-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+  /* PROMPTS FULL */
+  .prompts-full { background: rgba(255,255,255,0.015); border-top: 1px solid rgba(255,255,255,0.05); }
+  .prompts-inner { max-width: 860px; margin: 0 auto; padding: 80px 40px; }
+  .prompts-inner h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px,4vw,44px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 8px; }
+  .prompts-inner .intro { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 56px; max-width: 560px; }
+  .full-prompt { margin-bottom: 60px; padding-bottom: 60px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .full-prompt:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .fp-header { margin-bottom: 20px; }
+  .fp-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--blue); letter-spacing: 3px; margin-bottom: 6px; }
+  .fp-name { font-size: 22px; font-weight: 900; letter-spacing: -0.3px; }
+  .fp-label {
+    display: block; font-family: 'DM Mono', monospace; font-size: 8px;
+    letter-spacing: 2px; color: #fff; background: rgba(79,195,247,0.15); border: 1px solid rgba(79,195,247,0.3);
+    padding: 8px 14px; border-radius: 6px 6px 0 0; margin-bottom: 0;
+  }
+  .fp-box {
+    background: rgba(79,195,247,0.06); border: 1px solid rgba(79,195,247,0.25);
+    border-top: 2px solid var(--blue); border-radius: 0 8px 8px 8px;
+    padding: 20px 22px; margin-bottom: 20px;
+  }
+  .fp-box pre {
+    font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.8;
+    color: #a8d8f0; white-space: pre-wrap; word-break: break-word;
+  }
+  .fp-why-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--blue); letter-spacing: 2px; margin-bottom: 6px; display: block; }
+  .fp-why { font-size: 13px; color: var(--muted2); line-height: 1.7; margin-bottom: 14px; }
+  .fp-result { font-size: 13px; font-weight: 700; color: var(--dkblue); line-height: 1.65; }
+
+  /* CTA */
+  .cta-section {
+    text-align: center; padding: 80px 40px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(180deg,transparent,rgba(79,195,247,0.02));
+  }
+  .cta-section h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px,4vw,48px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 16px; }
+  .cta-section h2 span { color: var(--blue); }
+  .cta-section p { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 480px; margin: 0 auto 32px; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--blue); color: var(--navy);
+    font-weight: 900; font-size: 15px; padding: 18px 40px;
+    border-radius: 12px; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(79,195,247,0.25); }
+  .cta-price { font-family: 'DM Mono', monospace; font-size: 10px; color: #2a5070; letter-spacing: 2px; margin-top: 14px; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.04); padding: 24px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-left .name { font-weight: 900; font-size: 14px; }
+  .footer-left .sub { font-family: 'DM Mono', monospace; font-size: 8px; color: #1a3a50; letter-spacing: 3px; margin-top: 3px; }
+  .footer-right { font-family: 'DM Mono', monospace; font-size: 9px; color: #0d2535; letter-spacing: 2px; text-align: right; }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 16px; }
+    .hero { padding: 60px 20px 40px; }
+    .what, .prompts-inner { padding: 60px 20px; }
+    .cta-section { padding: 60px 20px; }
+    footer { padding: 20px; flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">◈</div>
+    <div>
+      <div class="logo-name">PixelMind™</div>
+      <div class="logo-sub">BY BLEUDREAMS™</div>
+    </div>
+  </a>
+  <a href="index.html#pricing" class="nav-btn">Get Full Access — $97</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">FREE RESOURCE · BLEUDREAMS™</div>
+  <h1>The Designer's<br/><span>Unfair Advantage</span></h1>
+  <div class="hero-sub">7 AI Prompts That Replace a $500 Creative Consultation</div>
+  <p class="hero-desc">These are the exact prompts PixelMind™ was built around. Copy them. Fill in the brackets. Use them today on any AI tool. No catch. No email required.</p>
+  <div class="hero-free">
+    <span class="free-label">PRICE</span>
+    <div class="free-price">FREE</div>
+    <span class="free-note">No email. No signup. Just scroll down and use them.</span>
+  </div>
+</section>
+
+<!-- WHAT YOU GET -->
+<section class="what">
+  <span class="section-tag">WHAT'S INSIDE</span>
+  <h2>7 prompts. Each one solves<br/>a real designer problem.</h2>
+  <div class="prompt-list">
+    <div class="prompt-item">
+      <span class="prompt-num">01</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Mood-to-Palette Prompt</div>
+        <div class="prompt-desc">Describe a feeling. Get a complete 5-color system with names, hex codes, roles, and creative director rationale.</div>
+      </div>
+    </div>
+    <div class="prompt-item">
+      <span class="prompt-num">02</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Typography Brief Prompt</div>
+        <div class="prompt-desc">Describe your brand. Get 3 defensible font pairings with the psychological reasoning behind each choice.</div>
+      </div>
+    </div>
+    <div class="prompt-item">
+      <span class="prompt-num">03</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Brief Builder Prompt</div>
+        <div class="prompt-desc">Turn a project description into a complete professional brief in 60 seconds. Scope creep stopped before it starts.</div>
+      </div>
+    </div>
+    <div class="prompt-item">
+      <span class="prompt-num">04</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Design Critic Prompt</div>
+        <div class="prompt-desc">Get an honest, scored critique of your design with specific problems paired with concrete fixes. No sugarcoating.</div>
+      </div>
+    </div>
+    <div class="prompt-item">
+      <span class="prompt-num">05</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Client Language Translator</div>
+        <div class="prompt-desc">Paste what your client said. Get it translated into actual design direction. Fewer revisions. Every time.</div>
+      </div>
+    </div>
+    <div class="prompt-item">
+      <span class="prompt-num">06</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Brand Consistency Audit</div>
+        <div class="prompt-desc">Catch brand drift before your client does. Full audit of any design against an existing brand system.</div>
+      </div>
+    </div>
+    <div class="prompt-item">
+      <span class="prompt-num">07</span>
+      <div class="prompt-info">
+        <div class="prompt-name">The Concept Expansion Prompt</div>
+        <div class="prompt-desc">Break through creative blocks. Get 5 genuinely different directions for any concept you're stuck on.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL PROMPTS -->
+<section class="prompts-full">
+  <div class="prompts-inner">
+    <span class="section-tag">THE PROMPTS — COPY & USE TODAY</span>
+    <h2>All 7. Complete.<br/>Ready to use right now.</h2>
+    <p class="intro">Copy each prompt. Fill in the brackets with your project details. Paste into ChatGPT, Claude, or any AI tool. That's it.</p>
+
+    <!-- PROMPT 01 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 01</div>
+        <div class="fp-name">The Mood-to-Palette Prompt</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>I'm designing for [describe the brand or project in 1-2 sentences].
+
+The emotional atmosphere I want to create is:
+[describe the feeling — e.g., "quiet luxury with an undercurrent of danger,"
+"nostalgic but not sentimental," "rebellious energy that still feels high-end"].
+
+The audience this needs to speak to:
+[describe as a real person, not a demographic].
+
+Build me a complete 5-color palette:
+  — Name each color (a real name, not just a color description)
+  — Give me the exact hex code
+  — Assign a role: Primary / Secondary / Accent / Neutral / Base
+  — Tell me the emotion this specific color carries
+  — Tell me exactly where and how to use it
+
+Then write 2-3 sentences explaining the creative logic behind this palette —
+why these colors work together and what the palette communicates before a word is read.</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">Every palette tool gives you colors. This gives you a color SYSTEM — with roles, emotions, and a rationale you can present to a client as strategy, not preference.</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">A 5-color system with names, hex codes, roles, usage guide, and creative director rationale. Client-ready from the first output.</p>
+    </div>
+
+    <!-- PROMPT 02 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 02</div>
+        <div class="fp-name">The Typography Brief Prompt</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>My brand/project: [describe in 2-3 sentences — what it does, who it's for,
+what it should feel like to encounter it].
+
+What this brand should NOT feel like: [name the aesthetic you're avoiding].
+
+Find me 3 font pairings. For each give me:
+
+  DISPLAY FONT: [exact name — Google Fonts preferred]
+  Why this display font: [the specific psychological reason, not just "it's elegant"]
+
+  BODY FONT: [exact name]
+  Why this body font: [why it pairs with the display, what it adds]
+
+  The creative tension: [what makes this combination interesting vs. just safe]
+  Personality tag: [2-3 words]
+  Best use case: [1 sentence]
+
+Make each pairing genuinely distinct — not 3 variations of the same personality.</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">Most font guides give you safe pairings. Safe is forgettable. This prompt extracts the REASONING — so you can explain your choices like a senior typographer instead of "it just feels right."</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">3 distinct, defensible font pairings with the reasoning already written. Present to a client with confidence.</p>
+    </div>
+
+    <!-- PROMPT 03 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 03</div>
+        <div class="fp-name">The Brief Builder Prompt</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>Build a complete professional design brief for:
+
+Project type: [e.g., brand identity, website redesign, packaging, campaign]
+Client/brand: [name]
+Context: [budget, existing brand elements, specific constraints]
+
+Write it so a designer who knows nothing about this project could start tomorrow.
+Include:
+
+  PROJECT OVERVIEW: [2-3 sentences, business context + what this needs to accomplish]
+  OBJECTIVES: [3 specific, measurable objectives]
+  TARGET AUDIENCE: [real human description — their taste, what they respond to]
+  TONE & VOICE: [describe as a person, not an adjective list]
+  DELIVERABLES: [specific list with format notes]
+  CONSTRAINTS: [what NOT to do — this section prevents scope creep]
+  INSPIRATION DIRECTION: [specific aesthetics, designers, brands, eras]
+  WHAT SUCCESS LOOKS LIKE: [how does it feel when this is working?]
+  TIMELINE: [phases with dates if possible]</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">Scope creep doesn't start at revision 4. It starts when there's no brief. This prompt creates the document that protects your time and your rate before a single pixel is placed.</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">A complete, professional brief ready to send before work starts. Use it to align expectations and stop scope creep before it begins.</p>
+    </div>
+
+    <!-- PROMPT 04 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 04</div>
+        <div class="fp-name">The Design Critic Prompt</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>Act as a senior art director — 20+ years of experience, strong opinions,
+someone who will tell me the truth without sugarcoating. Be specific.
+Vague feedback is useless.
+
+Here's the design: [describe in detail — layout, colors, typography, imagery,
+spacing, hierarchy, what it's for, who it's for, what it should make people feel]
+
+Give me:
+
+  1. SCORE: A number out of 100. One sentence explaining it.
+
+  2. STRENGTHS (3 specific): Exactly what works and why it matters.
+
+  3. PROBLEMS (3 specific): Name the exact issue. Why it hurts the design.
+     Then give a concrete fix — not "improve the hierarchy" but the specific change.
+
+  4. QUICK WINS (3): Things I can implement in under 30 minutes.
+
+  5. THE MOVE THAT MAKES IT ICONIC: One bold choice that elevates this from
+     solid to unforgettable. Don't play it safe.</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">You cannot objectively critique your own work. You're too close. This prompt gives you a structured external perspective on demand — specific enough to act on immediately.</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">A scored critique with fixes attached to every problem. Use it before client delivery or any time you need a real perspective instead of polite feedback.</p>
+    </div>
+
+    <!-- PROMPT 05 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 05</div>
+        <div class="fp-name">The Client Language Translator</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>My client gave me this feedback: [paste their exact words]
+
+Translate their feedback into specific, actionable design direction.
+
+  1. WHAT THEY'RE ACTUALLY REACTING TO: Identify the real design element —
+     contrast? Hierarchy? Color temperature? Typographic weight?
+
+  2. WHAT THEY WANT INSTEAD: Based on their language, what outcome are they
+     describing even without the words for it?
+
+  3. THREE CONCRETE CHANGES: Specific adjustments that address the real concern.
+     Each one implementable today.
+
+  4. WHAT TO SAY BACK TO THEM: 2-3 sentences to confirm direction before
+     starting revisions so you're both aligned.</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">"Make it pop" is not design direction. This prompt decodes client language into actual design decisions — saving you revision cycles every single time.</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">Client feedback translated into real direction with specific changes. Fewer revisions. Clearer process. Better outcomes.</p>
+    </div>
+
+    <!-- PROMPT 06 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 06</div>
+        <div class="fp-name">The Brand Consistency Audit</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>I need a brand consistency audit for a new piece of work.
+
+Existing brand system:
+  — Primary colors: [list with hex codes]
+  — Typography: [display and body fonts]
+  — Logo style: [describe]
+  — Imagery direction: [visual style, subject matter]
+  — Brand tone: [describe]
+  — Always feels like: [describe]
+  — Never feels like: [describe]
+
+New piece I'm reviewing: [describe every element — colors, fonts,
+layout, imagery style, copy tone]
+
+Audit for brand consistency:
+  1. WHAT'S CONSISTENT: Elements true to the system
+  2. WHAT'S DRIFTING: Specific elements breaking consistency and why
+  3. HOW TO FIX EACH DRIFT: Concrete corrections for every flagged element
+  4. VERDICT: Publishable as-is, or needs work first?</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">Brand drift is a slow erosion — one slightly different shade here, a heavier font weight there. This prompt catches it before the client does.</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">A full consistency audit that protects brand integrity, whether you're the original designer or inheriting someone else's system.</p>
+    </div>
+
+    <!-- PROMPT 07 -->
+    <div class="full-prompt">
+      <div class="fp-header">
+        <div class="fp-num">PROMPT 07</div>
+        <div class="fp-name">The Concept Expansion Prompt</div>
+      </div>
+      <span class="fp-label">▸ COPY THIS — FILL IN THE BRACKETS — PASTE INTO ANY AI TOOL</span>
+      <div class="fp-box"><pre>I have a design concept I'm developing and need to push it further
+or explore real alternatives.
+
+Where I am: [describe your current direction — colors, typography, layout
+thinking, imagery approach, emotional intent]
+
+What I need: [choose one]
+  A) Push this concept further — what makes it more bold, more itself?
+  B) Explore alternatives — show me 5 genuinely different directions
+  C) Both
+
+For each alternative direction give me:
+  — The emotional register: what feeling does this version lead with?
+  — Color approach: the system logic, not specific colors
+  — Typography direction: what kind of type and why?
+  — The design philosophy in one sentence
+  — What it gives up vs. the current direction
+
+Then: which direction has the most potential and why?</pre></div>
+      <span class="fp-why-label">WHY THIS WORKS</span>
+      <p class="fp-why">Every designer hits creative walls. The usual escape is a variation of what you already have. This generates genuine alternatives with a framework for evaluating them.</p>
+      <span class="fp-why-label">WHAT YOU GET</span>
+      <p class="fp-result">5 distinct creative directions instantly. Break through a block, give a client real options, or find the version that's actually better than your first idea.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <span class="section-tag" style="display:block;margin-bottom:20px">READY FOR THE FULL SYSTEM?</span>
+  <h2>The prompts are the foundation.<br/><span>PixelMind™ is the system.</span></h2>
+  <p>Four AI tools built exclusively for graphic designers. Color palettes, font pairings, briefs, and critique — all in one place. $97 one-time. No subscriptions.</p>
+  <a href="index.html#pricing" class="btn-primary">Get PixelMind™ — $97 →</a>
+  <div class="cta-price">ONE-TIME PAYMENT · NO SUBSCRIPTION · YOURS FOREVER</div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <div class="name">PixelMind™</div>
+    <div class="sub">BY BLEUDREAMS™ · @EBABYBLUEDREAMS</div>
+  </div>
+  <div class="footer-right">STAY DIFFERENT. STAY GLOWING. 💙<br/>BLEUDREAMS™ © 2025</div>
+</footer>
+
+</body>
+</html>
