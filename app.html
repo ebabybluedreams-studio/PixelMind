@@ -582,7 +582,7 @@ function showTool(id){
 }
 
 async function api(prompt,system){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system,messages:[{role:'user',content:prompt}]})});
+  const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system,messages:[{role:'user',content:prompt}]})});
   const d=await r.json();return d.content?.[0]?.text||'';
 }
 function v(id){return(document.getElementById(id)||{}).value||''}
@@ -591,6 +591,727 @@ function lm(h){const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)
 function pr(raw){return JSON.parse(raw.replace(/```json|```/g,'').trim())}
 function sr(id,html){document.getElementById(id+'-result').innerHTML=html}
 function cp(txt){navigator.clipboard&&navigator.clipboard.writeText(txt)}
+
+/* ════════════════════════ PIXELMIND™ DEMO MODE ════════════════════════
+   DEMO_MODE = true  → built-in premium sample outputs (no API key needed)
+   GO LIVE: 1) Add ANTHROPIC_API_KEY in Netlify → Site Settings → Env Vars
+            2) Change DEMO_MODE to false below. That's it.
+   ═══════════════════════════════════════════════════════════════════ */
+const DEMO_MODE=true;
+function vd(id,fb){const x=(v(id)||'').trim();return x||fb}
+const DEMO={};
+const DEMO_IX={};
+async function gen(tool,prompt,system){
+  if(!DEMO_MODE)return pr(await api(prompt,system));
+  await new Promise(r=>setTimeout(r,900+Math.random()*800));
+  let bank=DEMO[tool],key=tool;
+  if(tool==='mockup'){const t=v('mk-type')||'logo';bank=DEMO.mockup[t]||DEMO.mockup.logo;key='mockup:'+t}
+  DEMO_IX[key]=((DEMO_IX[key]===undefined?-1:DEMO_IX[key])+1)%bank.length;
+  return bank[DEMO_IX[key]]();
+}
+
+/* ───────── COLOR PALETTE — 5 variations ───────── */
+DEMO.palette=[
+()=>({title:"Midnight Authority",palette:[
+{name:"Ink Navy",hex:"#0b1d33",role:"Primary",emotion:"Deep, decisive, established",usage:"Backgrounds, headers, primary surfaces — this is the brand's gravity"},
+{name:"Signal Blue",hex:"#2e7ddb",role:"Secondary",emotion:"Sharp, alert, modern",usage:"Buttons, links, and key interactive moments"},
+{name:"Electric Cyan",hex:"#4FC3F7",role:"Accent",emotion:"Energetic, forward, alive",usage:"Highlights, data points, hover states — use sparingly for maximum impact"},
+{name:"Steel Mist",hex:"#9fb3c8",role:"Neutral",emotion:"Calm, technical, refined",usage:"Secondary text, dividers, supporting UI"},
+{name:"Bone White",hex:"#f4f1ea",role:"Base",emotion:"Warm, clean, breathable",usage:"Light backgrounds and reversed text — softer than pure white"}],
+story:"This palette behaves like a tailored suit with one bold accessory: the navy does the heavy lifting while the cyan delivers the moment of personality. It reads premium in fintech, consulting, and any space where trust is the product."}),
+()=>({title:"Desert Modern",palette:[
+{name:"Terracotta Clay",hex:"#c1572f",role:"Primary",emotion:"Grounded, warm, human",usage:"Hero sections, packaging panels, brand moments"},
+{name:"Sun Sand",hex:"#e8c9a0",role:"Secondary",emotion:"Soft, inviting, tactile",usage:"Backgrounds and large fields — keeps warmth without shouting"},
+{name:"Sage Field",hex:"#8a9b6e",role:"Accent",emotion:"Natural, balanced, fresh",usage:"Callouts, tags, eco and wellness cues"},
+{name:"Roast Charcoal",hex:"#2e2a26",role:"Neutral",emotion:"Stable, serious, editorial",usage:"All body text and grounding elements"},
+{name:"Linen Cream",hex:"#f7f2e9",role:"Base",emotion:"Airy, organic, honest",usage:"Primary light background across web and print"}],
+story:"Earth tones are everywhere right now — this set avoids the cliché by pushing the terracotta darker and letting sage carry the freshness. Built for lifestyle, wellness, hospitality, and founder-led brands that want warmth with a spine."}),
+()=>({title:"Electric Luxe",palette:[
+{name:"Absolute Black",hex:"#0a0a0c",role:"Primary",emotion:"Premium, confident, infinite",usage:"The canvas. Everything lives on this"},
+{name:"Royal Violet",hex:"#7c3aed",role:"Secondary",emotion:"Creative, rare, magnetic",usage:"Gradients, feature panels, signature brand moments"},
+{name:"Champagne Gold",hex:"#d4af6a",role:"Accent",emotion:"Earned, exclusive, warm",usage:"Pricing, badges, and the details people screenshot"},
+{name:"Smoke Grey",hex:"#6b6b76",role:"Neutral",emotion:"Quiet, supportive, technical",usage:"Captions, metadata, secondary labels"},
+{name:"Pearl",hex:"#efeef2",role:"Base",emotion:"Crisp, clean, gallery-like",usage:"Text on dark, light-mode surfaces"}],
+story:"Black-and-gold is the oldest luxury trick in the book — the violet is what makes this feel 2026 instead of 1996. Ideal for premium digital products, beauty, nightlife, and personal brands selling transformation."}),
+()=>({title:"Coastal Slate",palette:[
+{name:"Harbor Slate",hex:"#3d5466",role:"Primary",emotion:"Steady, weathered, trustworthy",usage:"Navigation, headlines, structural elements"},
+{name:"Seafoam",hex:"#a8d5c7",role:"Secondary",emotion:"Light, restorative, open",usage:"Section backgrounds and breathing room"},
+{name:"Buoy Coral",hex:"#e8745c",role:"Accent",emotion:"Friendly, energizing, optimistic",usage:"CTAs and conversion moments — one warm note in a cool field"},
+{name:"Fog",hex:"#c9d3d8",role:"Neutral",emotion:"Soft, ambient, unobtrusive",usage:"Borders, cards, inactive states"},
+{name:"Driftwood White",hex:"#faf8f4",role:"Base",emotion:"Natural, sunlit, calm",usage:"Primary background everywhere"}],
+story:"Cool palettes often feel cold — the coral fixes that with a single warm interruption that pulls the eye exactly where you want action. Strong fit for travel, health, SaaS, and any brand promising relief from chaos."}),
+()=>({title:"Studio Noir",palette:[
+{name:"Darkroom Black",hex:"#141414",role:"Primary",emotion:"Focused, cinematic, serious",usage:"Backgrounds, portfolio frames, gallery surfaces"},
+{name:"Crimson Signal",hex:"#d62839",role:"Secondary",emotion:"Urgent, passionate, unmissable",usage:"Brand mark, key headlines, sold-out badges"},
+{name:"Warm Concrete",hex:"#8c8680",role:"Neutral",emotion:"Industrial, honest, textured",usage:"Body copy on dark, structural dividers"},
+{name:"Paper White",hex:"#f5f3ef",role:"Base",emotion:"Editorial, archival, clean",usage:"Light surfaces and reversed type"},
+{name:"Graphite Line",hex:"#3a3a3a",role:"Accent",emotion:"Precise, drawn, intentional",usage:"Rules, frames, and underline details"}],
+story:"One color. That's the whole strategy — crimson against near-black gives you the recognition of a much bigger brand on a one-person budget. Built for photographers, studios, streetwear, and portfolios that need to feel curated, not decorated."})];
+
+/* ───────── FONT PAIRINGS — 5 variations (15 pairings) ───────── */
+DEMO.fonts=[
+()=>({pairings:[
+{display:"Fraunces",body:"Inter",tag:"Editorial Modern",why_display:"Fraunces brings old-style serif character with contemporary optical sizing — it feels literary without feeling dusty.",why_body:"Inter is the most legible screen workhorse alive; it disappears so the display face can perform.",tension:"A wonky vintage serif against a clinical neutral sans — the friction is the personality.",use_case:"Editorial brands, premium newsletters, founder-led personal brands"},
+{display:"Space Grotesk",body:"Lora",tag:"Tech Humanist",why_display:"Space Grotesk has just enough quirk in its terminals to feel designed rather than default.",why_body:"Lora's calligraphic roots add warmth that pure-tech brands desperately lack.",tension:"Machine-made headline, hand-influenced body — technology with a pulse.",use_case:"SaaS products, AI tools, startups that don't want to look like every startup"},
+{display:"DM Serif Display",body:"Work Sans",tag:"Quiet Luxury",why_display:"High-contrast strokes give DM Serif instant fashion-magazine authority at large sizes.",why_body:"Work Sans is friendly and unfussy — it keeps the luxury accessible instead of intimidating.",tension:"Glamour up top, approachability below — premium without the velvet rope.",use_case:"Beauty, interiors, boutique services, coaching brands"}]}),
+()=>({pairings:[
+{display:"Syne",body:"Manrope",tag:"Future Bold",why_display:"Syne's extra-wide extra-bold weight feels like signage from a city that doesn't exist yet.",why_body:"Manrope is geometric but soft-cornered — modern without the coldness.",tension:"Maximum display attitude restrained by a disciplined body — controlled chaos.",use_case:"Creative platforms, music, streetwear, web3-adjacent brands"},
+{display:"Playfair Display",body:"Karla",tag:"Classic Remix",why_display:"Playfair's dramatic contrast is timeless headline material — it has never once looked cheap.",why_body:"Karla's slightly off-kilter grotesque keeps the pairing from feeling like a wedding invitation.",tension:"Heritage serif meets imperfect sans — tradition that knows how to relax.",use_case:"Restaurants, boutique hotels, premium e-commerce"},
+{display:"Archivo Black",body:"Rubik",tag:"Poster Energy",why_display:"Archivo Black hits like a protest poster — zero subtlety, total commitment.",why_body:"Rubik's rounded corners soften the blow and keep long passages comfortable.",tension:"A shout followed by a conversation — impact then intimacy.",use_case:"Events, fitness, campaigns, anything that needs to stop a scroll"}]}),
+()=>({pairings:[
+{display:"Bebas Neue",body:"Montserrat",tag:"Athletic Premium",why_display:"Bebas Neue's tall condensed caps create instant vertical drama in tight spaces.",why_body:"Montserrat's geometric clarity reads cleanly at every size and weight.",tension:"Compression against openness — the layout breathes because the headline doesn't.",use_case:"Sports, supplements, automotive, bold product launches"},
+{display:"Cormorant Garamond",body:"Nunito Sans",tag:"Soft Heritage",why_display:"Cormorant's delicate strokes whisper old-world craft at display sizes.",why_body:"Nunito Sans is warm and rounded — it makes elegance feel friendly instead of formal.",tension:"Sixteenth-century refinement meets modern softness — heirloom energy, current delivery.",use_case:"Weddings, skincare, artisan goods, slow-living brands"},
+{display:"Sora",body:"Merriweather",tag:"Inverted Authority",why_display:"Sora is a crisp technical sans built for screens — using it as display flips the usual formula.",why_body:"Merriweather as body text adds bookish credibility that pure-sans pages never achieve.",tension:"Sans headline, serif body — the reverse of convention, and that's exactly why it's memorable.",use_case:"Research-driven brands, fintech, consultancies, thought leadership"}]}),
+()=>({pairings:[
+{display:"Abril Fatface",body:"Poppins",tag:"Statement Chic",why_display:"Abril Fatface is pure didone drama — one word in this face is a whole campaign.",why_body:"Poppins keeps everything else light, geometric, and effortlessly current.",tension:"Opera in the headline, pop song in the paragraph.",use_case:"Fashion, beauty drops, magazine-style landing pages"},
+{display:"Epilogue",body:"Lora",tag:"Modern Literary",why_display:"Epilogue's variable width gives headlines a confident architectural quality.",why_body:"Lora brings the storytelling warmth that makes people actually read past the fold.",tension:"Structure meets narrative — a building with a fireplace inside.",use_case:"Publishing, course creators, premium content brands"},
+{display:"Space Grotesk",body:"Crimson Pro",tag:"Lab Notes",why_display:"Space Grotesk reads like precision instrumentation — credible by association.",why_body:"Crimson Pro is a true book serif, lending academic depth to every claim.",tension:"The scientist's headline over the scholar's footnote.",use_case:"Health tech, research products, expert-positioned services"}]}),
+()=>({pairings:[
+{display:"Outfit",body:"Inter",tag:"Clean System",why_display:"Outfit is geometric and self-assured — the safest bold choice in the modern sans category.",why_body:"Inter pairs invisibly, creating a unified system that scales across every product surface.",tension:"Minimal friction by design — this pairing is about consistency, not contrast.",use_case:"Apps, dashboards, design systems, multi-product brands"},
+{display:"Libre Baskerville",body:"Work Sans",tag:"Trusted Editorial",why_display:"Libre Baskerville carries 250 years of print credibility into the browser.",why_body:"Work Sans modernizes the page so the serif reads as choice, not nostalgia.",tension:"The newspaper masthead above the modern article.",use_case:"Legal, finance, journalism, legacy brands going digital"},
+{display:"Syne",body:"Karla",tag:"Gallery Wall",why_display:"Syne at heavy weights feels like exhibition signage — art-world confidence built in.",why_body:"Karla's quiet quirks reward close reading without distracting from the work.",tension:"Loud frame, humble caption — the artwork stays the hero.",use_case:"Portfolios, galleries, photographers, creative studios"}]})];
+
+/* ───────── PROJECT BRIEF — 5 variations ───────── */
+DEMO.brief=[
+()=>({overview:`${vd('b-proj','This project')} is a complete brand identity launch designed to take the business from invisible to unmistakable. The work covers the core mark, color and type system, and the launch assets needed to show up consistently across web and social from day one — built for ${vd('b-client','a founder')} who needs the brand to sell while they sleep.`,
+objectives:["Create a primary mark and logo system that stays legible from a 32px avatar to a storefront sign","Establish a color and typography system the owner can apply without a designer on call","Ship a launch kit — profile assets, three templates, and a one-page brand sheet — ready for immediate use"],
+audience:"Early customers discovering the brand through social and word of mouth — people who decide in under five seconds whether something looks credible enough to click.",
+tone:"Confident and direct with warmth underneath. Premium, never pretentious. Every word earns its place.",
+deliverables:["Primary logo + simplified mark + monochrome variants","Color palette with usage rules and accessibility checks","Typography system (display, body, UI) with pairing guidance","Launch asset kit: avatars, banners, story templates, brand one-pager"],
+constraints:"Must work in single color for embroidery and print. Avoid trend-dependent gradients that will date the brand within two years.",
+inspiration:"Brands that feel inevitable rather than decorated — think clean geometry, generous spacing, one signature move repeated everywhere.",
+success:"The owner posts launch content and gets 'who did your branding?' messages within the first week. Recognition without explanation.",
+timeline:"Three weeks: discovery and direction (week 1), design and refinement (week 2), system build and delivery (week 3)."}),
+()=>({overview:`${vd('b-proj','This campaign')} is a 30-day social push built around one repeatable visual idea strong enough to survive a month of posting. The goal is not variety — it's recognition: by day 30, ${vd('b-client','the client')}'s audience should identify a post before reading the handle.`,
+objectives:["Develop one ownable visual format that flexes across announcements, education, and proof content","Increase saves and shares — the two signals that compound reach — by giving every post a keepable element","Drive traffic to a single conversion point with a consistent, unmissable CTA treatment"],
+audience:"Followers who scroll fast and decide faster — plus the cold audience the algorithm shows shared content to. Design for the person who has never heard of the brand.",
+tone:"Punchy and generous. Teach something or claim something in every frame. No filler posts, no engagement bait.",
+deliverables:["Master template system: 1 hero format + 3 variants","Cover/thumbnail treatment for consistent grid identity","Story and Reel cover templates matched to the system","Day-by-day format map: which template, which content type, which CTA"],
+constraints:"Every asset must be editable in a phone-based tool — no desktop-only files. Text must be readable with sound off and screen brightness low.",
+inspiration:"Accounts where the format IS the brand — strong color blocking, oversized type, one signature layout move per post.",
+success:"Saves per post double by week three, and at least one post breaks out of the existing follower bubble into recommended feeds.",
+timeline:"One week of system design, then the 30-day run with a mid-campaign check at day 14."}),
+()=>({overview:`${vd('b-proj','This website redesign')} replaces a page that describes the business with one that sells it. The new site is built backwards from a single action — the inquiry — and every section either moves a visitor toward that action or gets cut. ${vd('b-ctx','Current site converts poorly despite decent traffic.')}`,
+objectives:["Rebuild the homepage as a conversion path: hook, proof, offer, action — in that order","Cut page weight and load time so mobile visitors see the hero in under two seconds","Create a visual hierarchy where the primary CTA is unmissable on every scroll depth"],
+audience:"Mobile-first visitors arriving from social profiles and shared links — high intent, low patience, comparing three options in three tabs.",
+tone:"Clear over clever. Specific claims, real numbers, zero corporate filler. The site should sound like its smartest customer describing it.",
+deliverables:["Homepage redesign with full responsive behavior","Above-the-fold hero with single primary action","Proof section: results, testimonials, or work — whichever converts strongest","Contact/checkout flow reduced to minimum possible steps"],
+constraints:"Must deploy on existing hosting with no new monthly costs. All images optimized; no autoplay video backgrounds.",
+inspiration:"Sites that feel like products, not brochures — obvious next step on every screen, confidence in the whitespace.",
+success:"Inquiry or checkout rate doubles within 30 days of launch at the same traffic level.",
+timeline:"Two weeks: wireframe and copy structure (days 1–4), visual design (days 5–9), build, test, launch (days 10–14)."}),
+()=>({overview:`${vd('b-proj','This packaging project')} turns the product's container into its best salesperson. On a shelf or in an unboxing video, the package has one job: make the person holding it feel like they chose well — and make the person watching want to choose the same.`,
+objectives:["Design a front panel that communicates category, brand, and quality in a two-second glance","Engineer one 'unboxing moment' — a reveal, message, or texture that earns the share","Build a dieline system that extends to future SKUs without redesign"],
+audience:"Two audiences at once: the in-person buyer scanning a shelf, and the online buyer whose first physical brand contact is the box arriving.",
+tone:"Considered and premium. The package should feel like part of the product, not protection for it.",
+deliverables:["Primary packaging design with print-ready dieline","Interior print or insert card with brand message","Label/sticker system for sealing and variants","Photography direction sheet for product listing images"],
+constraints:"Two-color print maximum on the primary run to protect margins. Materials must survive standard shipping without protective overpack.",
+inspiration:"Packaging where restraint reads as confidence — single bold color fields, tactile paper, type doing the work imagery usually does.",
+success:"Customers photograph the package unprompted. Repeat buyers mention the unboxing in reviews.",
+timeline:"Three weeks including one physical proof round before final print approval."}),
+()=>({overview:`${vd('b-proj','This event promotion')} builds anticipation in three escalating waves — announce, amplify, urgency — so the audience hears about it at least seven times before the date. ${vd('b-client','The organizer')} needs assets that feel like one campaign, not twelve disconnected posts.`,
+objectives:["Create a single key visual strong enough to anchor every asset from poster to story","Build a countdown system that turns the final 72 hours into the highest-converting window","Make every attendee-facing asset shareable — promotion that recruits promoters"],
+audience:"A warm local-or-niche audience that needs social proof to commit — they attend when it looks like everyone else already decided to.",
+tone:"Electric but credible. Big promises backed by specifics: who, what, where, why it matters.",
+deliverables:["Key visual + poster (print and digital)","Social announcement set: feed, story, and event-page formats","Countdown template series (7-day, 3-day, day-of)","Day-of assets: signage, story stickers, post-event thank-you"],
+constraints:"All dates and venue details on editable layers for inevitable changes. Key visual must work in both portrait and landscape crops.",
+inspiration:"Tour-poster energy — one unforgettable image, bold type lockup, every subsequent asset a remix of the original.",
+success:"Ticket or RSVP velocity spikes at each campaign wave, with the final 72-hour push driving at least a third of total attendance.",
+timeline:"Key visual in week one, full asset rollout aligned to the three-wave calendar through event day."})];
+
+/* ───────── DESIGN CRITIQUE — 5 variations ───────── */
+DEMO.critique=[
+()=>({score:82,verdict:"Strong foundation with a hierarchy problem — everything is shouting at the same volume, so nothing leads.",
+strengths:[{point:"Color discipline",why:"The palette is restrained and consistent, which already puts this ahead of most work in the category."},{point:"Quality of imagery",why:"The visuals feel intentional and on-brand rather than pulled from a stock folder at the last minute."},{point:"Clear brand presence",why:"The mark and name are findable within the first second — many designs bury this and lose attribution."}],
+problems:[{issue:"Flat visual hierarchy",why:"Headline, subhead, and body sit too close in size and weight, forcing the viewer to work out what matters.",fix:"Triple the size gap between your headline and everything else. The headline should be readable from across a room; the rest is for people already interested."},{issue:"CTA blends into the layout",why:"The action you want competes with decorative elements for attention and loses.",fix:"Give the CTA the single highest-contrast color on the canvas and surround it with more empty space than feels comfortable."},{issue:"Edge crowding",why:"Elements run close to the margins, which reads as accidental rather than confident.",fix:"Set a hard margin — at least 5% of the canvas on every side — and let nothing cross it."}],
+quick_wins:["Bump headline weight to the heaviest available and cut its length to seven words or fewer","Remove the two least important elements entirely — subtraction is the fastest upgrade","Align everything to a single left edge instead of mixing centered and left-aligned blocks"],
+iconic:"Pick the one element that makes this design yours — the color, the type treatment, the layout move — and make it 50% more extreme. Iconic work is a single decision pushed past the point of comfort."}),
+()=>({score:74,verdict:"The concept is right but the color relationships are fighting it — there's tension where there should be harmony.",
+strengths:[{point:"Strong concept",why:"The underlying idea is communicable in one sentence, which means the strategy work is done."},{point:"Good typography choices",why:"The typefaces suit the brand's register; this is a tuning problem, not a casting problem."},{point:"Confident scale",why:"Key elements are sized boldly — the design isn't timid, which is the harder problem to fix."}],
+problems:[{issue:"Too many competing hues",why:"Four-plus colors at similar saturation create visual noise and dilute brand recognition.",fix:"Reduce to one dominant, one neutral, one accent. Reassign every current color to one of those three roles."},{issue:"Insufficient contrast on text",why:"Mid-tone text on mid-tone backgrounds fails readability — and accessibility — at a glance.",fix:"Check every text layer at arm's length on a phone. If it requires effort, darken the text or lighten the field."},{issue:"Accent color used everywhere",why:"When the accent appears five times, it stops being an accent and the eye has no anchor.",fix:"Allow the accent exactly once per composition — on the element you most want clicked or remembered."}],
+quick_wins:["Convert the design to greyscale to test hierarchy; if it falls apart, contrast is the issue, not color","Pull the background saturation down 30% and watch the foreground instantly organize itself","Sample colors from your single best brand photo to guarantee built-in harmony"],
+iconic:"Commit to a one-color signature. The brands you can identify from a blur all chose a single hue and defended it everywhere — pick yours and never let a competitor use it near you."}),
+()=>({score:88,verdict:"This is genuinely close — the remaining gap is typographic restraint. You have three jobs being done by five fonts.",
+strengths:[{point:"Excellent composition",why:"The eye travels exactly where it should: entry point, supporting detail, action. That sequencing is the hardest skill in layout."},{point:"Sophisticated palette",why:"The colors feel chosen rather than defaulted — there's a point of view here."},{point:"Real personality",why:"This couldn't belong to a competitor. Distinctiveness is the asset most designs never achieve."}],
+problems:[{issue:"Typeface overload",why:"Multiple display faces in one composition compete for the personality slot — only one can win.",fix:"One display face, one body face, and weights/sizes of those two for everything else. Delete the rest."},{issue:"Inconsistent letter spacing",why:"Tracked-out caps in one block and tight lowercase in another reads as two different designers.",fix:"Set one tracking rule for labels (wide) and one for everything else (default), then apply globally."},{issue:"Orphaned small text",why:"Tiny disconnected captions float without clear attachment to what they describe.",fix:"Anchor every caption within 8px of its subject, or cut it — floating text is visual debt."}],
+quick_wins:["Pick your two best fonts right now and rebuild the text layers in 15 minutes — it's faster than it sounds","Increase line spacing on body text by 20% for an instant premium feel","Set all labels in one consistent size — a label system reads as professionalism"],
+iconic:"Develop one signature type move — an underline style, a number treatment, a way of breaking headlines — and repeat it until people associate it with you. Repetition is what turns a choice into a brand."}),
+()=>({score:67,verdict:"There's a good design buried in here under too much material — this needs an editor more than a designer.",
+strengths:[{point:"Information is complete",why:"Everything the audience needs is present — the problem is curation, which is far easier to fix than absence."},{point:"Brand colors are correct",why:"The palette matches the established identity, maintaining recognition equity."},{point:"Genuine effort is visible",why:"This isn't lazy work — it's overcommitted work, and ambition trims down better than apathy builds up."}],
+problems:[{issue:"No breathing room",why:"Every region of the canvas is occupied, so the viewer has nowhere to rest and nothing to prioritize.",fix:"Remove 40% of the content. Whatever survives gets dramatically more attention than anything got before."},{issue:"Competing focal points",why:"Three elements claim 'most important' status, and attention splits three ways into nothing.",fix:"Choose one hero. Shrink the other two by half or move them to a follow-up asset."},{issue:"Decorations without purpose",why:"Shapes, lines, and effects that don't carry information add weight without value.",fix:"For each decorative element ask: if I delete this, is anything lost? Honest answer, then delete accordingly."}],
+quick_wins:["Duplicate the file and delete half of everything in the copy — compare them side by side","Make the background a single flat color and let the content be the only texture","Cut text by writing the same message in half the words — constraint forces clarity"],
+iconic:"The most premium move in design is emptiness. The luxury brands you admire pay for whitespace the way others pay for features — give one element a vast empty stage and watch it become unforgettable."}),
+()=>({score:79,verdict:"Visually competent but tonally generic — this design is well-executed in a voice that belongs to everyone.",
+strengths:[{point:"Technical execution is clean",why:"Alignment, spacing, and color application are all handled correctly — the craft fundamentals are in place."},{point:"Appropriate for the audience",why:"Nothing here would alienate or confuse the target viewer; it clears the baseline."},{point:"Scalable structure",why:"The layout would adapt easily across formats, which means the system thinking is sound."}],
+problems:[{issue:"Interchangeable visual language",why:"Swap the logo and this could ship for any competitor — there's no ownable element.",fix:"Identify one thing the brand can claim — a color, an angle, a word style, a recurring object — and feature it prominently."},{issue:"Stock-feeling imagery",why:"The visuals are pleasant but anonymous, signaling 'template' rather than 'brand'.",fix:"Replace with imagery only this brand could use: real product, real people, real environment — imperfect beats anonymous."},{issue:"Safe headline writing",why:"The copy describes the category instead of staking a claim, wasting the highest-attention real estate.",fix:"Rewrite the headline as something a competitor would be afraid to say. Specific and bold beats accurate and forgettable."}],
+quick_wins:["Add one unexpected element — a color break, an oversized number, a handwritten note — that interrupts the template feel","Replace the most generic image with the most specific one available, even at lower production quality","Read the headline aloud; if it could end with 'like everyone else,' rewrite it"],
+iconic:"Generic is the only real failure state in branding. Take the single weirdest true thing about this brand — its origin, its method, its founder — and build the entire visual concept around that. Weird and true beats polished and anonymous every time."})];
+
+/* ───────── MOOD BOARD — 5 variations ───────── */
+DEMO.mood=[
+()=>({title:"Quiet Power",tagline:"Confidence that doesn't need to raise its voice",
+palette:{primary:"#1a2332",secondary:"#c9b896",accent:"#8a4f3d"},
+typography:{display:"Cormorant Garamond",body:"Inter",rationale:"Old-world serif authority over modern sans clarity — heritage credibility with contemporary usability."},
+imagery:["Architectural shadows at golden hour — strong geometry, warm light","Hands at work: craft details, materials, process shots in shallow focus","Negative space portraits — subject small in frame, environment doing the talking"],
+textures:["Heavyweight uncoated paper grain","Brushed dark metal with soft reflections"],
+feeling:"Walking into a private library where someone important is expecting you — calm, established, slightly intimidating in the best way.",
+references:["Aesop's retail interiors — restraint as a luxury statement","Kinfolk magazine's editorial spacing and pacing","Bottega Veneta's logoless confidence era"],
+avoid:"Bright gradients, drop shadows, exclamation-point energy — anything that tries hard. This direction wins by appearing not to compete."}),
+()=>({title:"Sunset Industrial",tagline:"Where the warehouse meets the golden hour",
+palette:{primary:"#2b2118",secondary:"#e07a3f",accent:"#f2c14e"},
+typography:{display:"Archivo Black",body:"Work Sans",rationale:"Heavy poster-grade headlines softened by an approachable working sans — strength without coldness."},
+imagery:["Warm light cutting through industrial spaces — dust, beams, texture","Bold product shots on raw materials: concrete, steel, reclaimed wood","Motion blur of real work happening — energy over polish"],
+textures:["Raw concrete with warm color grading","Worn leather and canvas strap details"],
+feeling:"The end of a productive day — tools down, sun low, the satisfaction of something built with your hands.",
+references:["Carhartt WIP's elevated workwear photography","Craft brewery branding done right: bold marks on honest materials","Levi's heritage campaigns — work as identity"],
+avoid:"Anything sterile or corporate-clean. No white studio backgrounds, no posed stock smiles — the grit is the brand."}),
+()=>({title:"Future Heritage",tagline:"Tomorrow's classic, designed today",
+palette:{primary:"#0f1b2d",secondary:"#4FC3F7",accent:"#d9d4c5"},
+typography:{display:"Syne",body:"Lora",rationale:"An experimental display face grounded by a literary serif — innovation that respects what came before."},
+imagery:["Classical forms shot with modern lighting: statues in neon, columns in fog","Macro details of precision: watch mechanisms, circuit boards, woven fiber","Vast minimal landscapes with a single human figure for scale"],
+textures:["Polished marble with subtle blue undertone","Matte technical fabric with visible weave"],
+feeling:"A museum exhibit from fifty years in the future displaying the best of right now — reverent, advanced, permanent.",
+references:["Apple's product films — slow, weighty, inevitable","Zaha Hadid architecture: heritage materials in impossible forms","Audemars Piguet's blend of tradition and provocation"],
+avoid:"Trend-stamped effects (glitch, vaporwave, chrome text) that will date the work within 18 months. Timeless is the entire point."}),
+()=>({title:"Soft Brutalism",tagline:"Hard structure, gentle delivery",
+palette:{primary:"#e8e4dc",secondary:"#1c1c1c",accent:"#e8745c"},
+typography:{display:"Space Grotesk",body:"Karla",rationale:"Technical grotesques with subtle quirks — systematic but never sterile."},
+imagery:["Massive concrete forms photographed in soft morning light","Single saturated objects against pale empty fields","Honest screenshots and interface fragments as design elements"],
+textures:["Poured concrete, close enough to see the pour lines","Soft-touch matte coating in pale neutrals"],
+feeling:"A brutalist building filled with warm light and plants — structure you can trust, warmth you didn't expect.",
+references:["Modern portfolio sites with oversized type and raw grids","The Barbican Centre's conservatory: concrete meets jungle","Teenage Engineering's playful-precise product design"],
+avoid:"Decorative flourishes, script fonts, rounded-corner softness everywhere — the contrast between hard and soft IS the concept; don't sand it off."}),
+()=>({title:"Coastal Minimal",tagline:"Everything you need, nothing you don't, near water",
+palette:{primary:"#3d5466",secondary:"#faf8f4",accent:"#a8d5c7"},
+typography:{display:"DM Serif Display",body:"Nunito Sans",rationale:"A graceful serif for moments of emphasis, a warm rounded sans for everything else — relaxed but composed."},
+imagery:["Horizon lines: sea, sky, and the calm of distance","Sun-bleached materials — rope, linen, weathered wood in natural light","Quiet morning rituals: coffee, open windows, unhurried hands"],
+textures:["Washed linen with natural wrinkles left in","Sea-glass smoothness in pale aqua tones"],
+feeling:"The first deep breath of a vacation morning — unhurried, clear-headed, like the to-do list belongs to someone else.",
+references:["Scandinavian coastal hotel branding — restraint with warmth","Surf-adjacent lifestyle brands that skip the clichés","Muji's philosophy: the absence of excess as a feature"],
+avoid:"Tropical clichés — palm silhouettes, sunset gradients, script 'beach vibes' type. This is coastal as a mindset, not a postcard."})];
+
+/* ───────── LOGO CONCEPTS — 5 variations (15 concepts) ───────── */
+DEMO.logo=[
+()=>({concepts:[
+{name:"The Monolith",approach:"WORDMARK",rationale:`Set ${vd('l-name','the brand name')} in a single heavy, slightly customized typeface — confidence through pure typography, no symbol needed.`,style:"Ultra-bold geometric sans with one modified letterform as the ownable detail — a cut terminal or extended bar that becomes the brand's fingerprint.",colors:"Single color application: near-black on light, bone-white on dark. The restraint is the statement.",typography:"Customized heavy grotesque, tightly tracked, always set at generous scale.",standout:"Wordmarks age better than trends and cost nothing to recognize — the modified letter gives lawyers and fans the same thing to point at."},
+{name:"The Cipher",approach:"MONOGRAM",rationale:"Compress the initials into a single interlocked form that works as an app icon, embroidery, and watermark from day one.",style:"Two letterforms sharing a stroke — constructed on a strict grid so the overlap feels engineered, not decorative.",colors:"Primary brand color as a solid field with the monogram reversed out — instant badge energy.",typography:"Monogram paired with a clean spaced-caps wordmark for contexts needing the full name.",standout:"One shared stroke between two letters is the kind of detail people discover, and discovery creates loyalty."},
+{name:"The Signal",approach:"ABSTRACT MARK",rationale:"A geometric symbol derived from the brand's core idea — abstract enough to scale with the business beyond its first product.",style:"Single continuous-line form with one deliberate break — simplicity with a story embedded in the gap.",colors:"Gradient-free two-tone: symbol in accent color, wordmark in neutral — clean separation of personality and information.",typography:"Medium-weight modern sans, wide-tracked, all caps — the symbol carries character so the type carries clarity.",standout:"Abstract marks let the brand outgrow its origin — the symbol means whatever the company becomes, not just what it sold first."}]}),
+()=>({concepts:[
+{name:"The Heirloom",approach:"CREST / EMBLEM",rationale:"A contained badge lockup that signals establishment and craft — built to look like it has always existed.",style:"Circular or shield containment with the name arched, founding detail below, one central icon — every element on a symmetrical axis.",colors:"Deep heritage tone with metallic-feel accent — foil-ready for print, single-color capable for everything else.",typography:"Engraved-style serif caps for the name, hairline sans for supporting text.",standout:"Badges create instant heritage perception — a two-year-old brand borrowing two hundred years of visual trust."},
+{name:"The Current",approach:"DYNAMIC WORDMARK",rationale:"A wordmark with one kinetic element — a letter that moves, tilts, or transforms across applications while the rest holds steady.",style:"Clean foundational type with a single designated 'live' character that adapts: filled at small sizes, animated in digital, exploded in campaigns.",colors:"Neutral wordmark, live character always in the accent color — the system teaches itself.",typography:"Sturdy neo-grotesque base ensuring the stable letters do their job invisibly.",standout:"One moving part gives social content built-in brand behavior — motion becomes identity without a mascot."},
+{name:"The Stamp",approach:"NEGATIVE SPACE",rationale:"A solid geometric shape with the mark cut out of it — the brand exists in the absence, which is exactly the kind of cleverness people share.",style:"Bold primary shape (square, circle, or arch) with letterform or symbol knocked out — reads as a stamp, app icon, and pattern unit simultaneously.",colors:"Works in any single color by definition — the concept is structural, not chromatic.",typography:"Knockout form paired with lowercase modern sans wordmark for friendliness against the bold mark.",standout:"Negative space marks are puzzles solved in half a second — that tiny 'oh!' moment is the cheapest memorability money can buy."}]}),
+()=>({concepts:[
+{name:"The Thread",approach:"CONTINUOUS LINE",rationale:`Draw ${vd('l-name','the mark')} as one unbroken line — symbolizing process, connection, and craft in a form that animates beautifully.`,style:"Single-weight line forming an abstract symbol or initial, with rounded terminals — hand-guided feel, machine-precise execution.",colors:"Line in brand accent on neutral fields; inverts perfectly for dark mode.",typography:"Light-weight geometric sans echoing the line's stroke width — mark and type feel drawn by the same hand.",standout:"Continuous-line marks have a built-in story (one line, never lifted) and a built-in animation (watch it draw itself) — content and identity in one asset."},
+{name:"The Block Party",approach:"STACKED TYPE",rationale:"The full name stacked into a dense typographic block — a poster, a label, and a logo in one structure.",style:"Words stacked flush in alternating weights, justified into a perfect rectangle — Swiss grid discipline with streetwear attitude.",colors:"High-contrast two-color: block in black or brand dark, one word highlighted in accent.",typography:"Condensed heavy sans allowing tight stacking without losing legibility at distance.",standout:"Stacked blocks fill space with authority — on a tee, a sticker, or a story frame, the logo IS the design."},
+{name:"The Orbit",approach:"ICON SYSTEM",rationale:"A simple core symbol plus a defined orbit of supporting glyphs — an identity built as a kit, not a single mark.",style:"Central geometric icon with 4–6 companion glyphs in matching construction — used individually as patterns, bullets, and badges.",colors:"Core icon in primary; companions in a defined sequence of palette tones — variety with strict rules.",typography:"Rounded-geometry sans matching the icon family's corner radius — total system coherence.",standout:"A glyph system gives every product, post, and page its own brand-correct decoration — the identity multiplies instead of repeating."}]}),
+()=>({concepts:[
+{name:"The Ligature",approach:"CUSTOM CONNECTION",rationale:"Join two letters of the name with a custom ligature — a typographic handshake that no font menu can replicate.",style:"Refined serif or sans base with one engineered connection between adjacent letters — subtle at small sizes, signature at large.",colors:"Sophisticated single-color application; the craft is in the curve, not the palette.",typography:"The wordmark IS the typography — supporting text in a quiet humanist sans several weights lighter.",standout:"Ligatures are the typographic equivalent of a tailored seam — invisible to most, unmistakable to anyone who looks twice, impossible to fake cheaply."},
+{name:"The Marker",approach:"GEO-PIN HYBRID",rationale:"Fuse the initial with a place/direction form — ideal for brands rooted in location, movement, or guidance.",style:"Letterform merged with an arrow, pin, or compass fragment — one shape, two readings, zero clutter.",colors:"Solid accent-color mark designed to sit on photography — strong silhouette over busy backgrounds.",typography:"Wide-stance sans with open apertures, lowercase for approachability.",standout:"Dual-read marks reward the second glance — and brands that reward attention earn repeat attention."},
+{name:"The Frequency",approach:"PATTERN MARK",rationale:"A mark built from repeating units — bars, dots, or waves — that doubles as an infinite brand pattern.",style:"3–5 repeated elements forming the core symbol; the same elements tile into backgrounds, borders, and packaging wraps.",colors:"Units in graduated palette steps creating built-in depth without gradients.",typography:"Strict modernist sans keeping all expressiveness in the pattern system.",standout:"Pattern-based marks turn every surface into brand real estate — the logo and the wallpaper are the same asset."}]}),
+()=>({concepts:[
+{name:"The Understatement",approach:"LOWERCASE MINIMAL",rationale:`${vd('l-name','The name')} set entirely lowercase in a perfected modern sans — the confidence of a brand that doesn't need to capitalize.`,style:"Optically corrected lowercase wordmark, generous letter spacing, no symbol — whitespace is the second design element.",colors:"Charcoal on warm white as default; the absence of color is the luxury cue.",typography:"A contemporary grotesque with subtle warmth — every curve inspected and adjusted at large scale.",standout:"Lowercase minimalism is the visual language of category leaders — it whispers 'we're already the answer' before a single claim is made."},
+{name:"The Mascot Mark",approach:"CHARACTER ICON",rationale:"A radically simplified character or object icon — personality that no abstract mark can match, memorability that no wordmark can.",style:"Flat, geometric character reduction — two or three shapes maximum, one expressive detail, infinitely reproducible.",colors:"Character in 2–3 flat brand colors with strong silhouette integrity in single-color versions.",typography:"Friendly rounded sans wordmark beside or below — the character leads, type supports.",standout:"Characters generate emotional attachment and content for free — a mark people want stickers of is marketing that pays for itself."},
+{name:"The Split",approach:"DIVIDED FIELD",rationale:"The name split across a divided color field — half/half composition expressing duality: craft and tech, classic and new, you and the client.",style:"Wordmark bridging two color blocks, letters changing color at the seam — the divide is the symbol.",colors:"Two strong palette tones meeting at a hard edge — instantly recognizable in any feed.",typography:"Heavy extended sans giving the seam maximum letterform to cut through.",standout:"The split-field mark turns the brand's core tension into its visual signature — strategy you can see from across the street."}]})];
+
+/* ───────── BRAND VOICE — 5 variations ───────── */
+DEMO.voice=[
+()=>({voice_name:"The Confident Insider",description:`${vd('v-brand','This brand')} speaks like the friend who already figured it out and is genuinely glad to show you the shortcut — assured, generous, never gatekeeping.`,
+traits:[{name:"Confidence",score:88,desc:"States things plainly; never hedges with 'maybe' or 'we think'"},{name:"Warmth",score:72,desc:"Direct but never cold — the reader feels included, not lectured"},{name:"Wit",score:60,desc:"A well-placed observation, not a comedy routine"},{name:"Formality",score:30,desc:"Contractions, short sentences, the rhythm of speech"}],
+dos:["Lead with the payoff, then explain — respect the reader's time","Use 'you' twice as often as 'we'","Make one strong claim per piece and stand behind it","Write like you'd talk to a smart friend over coffee"],
+donts:["Open with 'In today's world' or any throat-clearing","Stack three adjectives where one strong noun works","Apologize for having an opinion","Use industry jargon to sound credentialed"],
+sample:{tagline:"You're closer than you think.",caption:"Everyone's selling you the complicated version because complicated is profitable. Here's the simple version: pick one thing, do it daily, track it weekly. That's the whole system. Save this for the next time someone tries to sell you a 12-module course on it.",bio:"Shortcuts earned the hard way, shared the easy way. New drops weekly."}}),
+()=>({voice_name:"The Warm Expert",description:"Deep competence delivered gently — this voice teaches without talking down, the favorite-professor energy that makes hard things feel learnable.",
+traits:[{name:"Expertise",score:92,desc:"Specific numbers, named methods, real examples — depth on display"},{name:"Patience",score:85,desc:"Breaks ideas into steps; never assumes prior knowledge"},{name:"Warmth",score:80,desc:"Encouraging by default; celebrates reader progress"},{name:"Playfulness",score:40,desc:"Light moments, but the substance always leads"}],
+dos:["Define any term a newcomer might not know — in-line, without ceremony","Use analogies from everyday life to land technical points","Acknowledge what's genuinely hard before explaining it","End teaching content with one small, doable next step"],
+donts:["Say 'simply' or 'just' about anything the reader might struggle with","Flex credentials when evidence will do","Rush to the advanced version before the basics are solid","Use sarcasm — it reads as superiority in this voice"],
+sample:{tagline:"Hard things, made learnable.",caption:"If pricing your work feels impossible, here's a starting frame: your rate isn't what the work takes you — it's what the result is worth to them. A logo that takes you four hours but anchors their brand for five years isn't a four-hour purchase. Start there, and the number gets easier.",bio:"Teaching what took me years, in minutes. Questions welcome — that's the point."}}),
+()=>({voice_name:"The Bold Disruptor",description:"This voice exists to break category scripts — provocative, certain, allergic to the way it's always been done. It picks fights with ideas, never people.",
+traits:[{name:"Boldness",score:95,desc:"Says what competitors think but won't post"},{name:"Clarity",score:85,desc:"Short declarative sentences; no qualifier survives editing"},{name:"Edge",score:75,desc:"Provocative framing — challenges the reader's defaults"},{name:"Empathy",score:55,desc:"The boldness serves the reader; it's never cruelty in a trench coat"}],
+dos:["Open with the most controversial true statement available","Name the broken industry norm explicitly","Back every provocation with one concrete proof point","Give the reader a side to join, not just a take to admire"],
+donts:["Punch down or mock customers — only systems and norms are targets","Manufacture outrage about things the brand doesn't actually oppose","Hedge a strong open with a weak close","Be edgy in the announcement and timid in the product"],
+sample:{tagline:"The old way had its chance.",caption:"Unpopular opinion that shouldn't be: most 'branding packages' are decoration invoiced as strategy. A logo without a positioning decision is a sticker. We start with the decision. The sticker comes after — and it hits harder because of it.",bio:"Burning the playbook, page by page. Built different on purpose."}}),
+()=>({voice_name:"The Quiet Authority",description:"Minimal words, maximum weight — this voice assumes the work speaks first and the copy simply opens the door. Editorial, composed, never eager.",
+traits:[{name:"Restraint",score:90,desc:"Says less than it could — every sentence survived a cut"},{name:"Precision",score:88,desc:"Exact words, exact numbers; nothing approximate"},{name:"Elegance",score:82,desc:"Rhythm and balance in every line — copy as typography"},{name:"Accessibility",score:45,desc:"Refined but not riddling; clarity is still the floor"}],
+dos:["Cut every sentence that explains another sentence","Let line breaks and white space carry pacing","Use the active voice and the present tense","State facts and let the reader supply the enthusiasm"],
+donts:["Use exclamation points — ever","Explain the joke, the work, or the price","Pad with adjectives; nouns and verbs only where possible","Chase trends in vocabulary; this voice doesn't say 'vibes'"],
+sample:{tagline:"Considered. Then made.",caption:"Three colors. Two typefaces. One decision, repeated until it became a brand. The new identity, now live.",bio:"Design practice. Selected work below. Inquiries open."}}),
+()=>({voice_name:"The Hype Architect",description:"Pure momentum — this voice turns launches into events and followers into a crowd. High energy, but engineered: every exclamation is placed, not spilled.",
+traits:[{name:"Energy",score:93,desc:"Short bursts, caps for impact, rhythm built for fast scrolling"},{name:"Community",score:85,desc:"Constant 'we/us' framing — the audience is on the team"},{name:"Urgency",score:78,desc:"Time and scarcity used honestly — real deadlines, real numbers"},{name:"Substance",score:65,desc:"Under the hype, the claims hold — receipts available"}],
+dos:["Announce in waves: tease, reveal, last call","Use real-time numbers — spots left, hours remaining, copies sold","Celebrate the audience's wins as brand content","Write captions that read out loud like a countdown"],
+donts:["Fake scarcity or extend a 'final' deadline — trust dies once","Use 10 hashtags where 3 strategic ones work","Hype without a payoff link — energy needs a destination","Stay loud in every post; contrast makes the loud posts land"],
+sample:{tagline:"You're early. Act like it.",caption:"48 HOURS. That's what's left before the price moves and never moves back. 312 of you already locked in — the wall of wins in my stories is getting crowded. If you've been waiting for a sign, this is the sign, time-stamped. Link's in the bio. See you inside. 🔵",bio:"Building in public, winning in public. Next drop loading…"}})];
+
+/* ───────── PROPOSAL — 5 variations ───────── */
+DEMO.proposal=[
+()=>({intro:`Thank you for the opportunity to put this together. After reviewing what you shared about ${vd('pr-proj','the project')}, I'm confident this is exactly the kind of work I do best — and the plan below is built to get you results, not just deliverables.`,
+understanding:"You need work that performs, delivered by someone who communicates clearly and hits dates. The brief is bigger than the asset itself: it's about how this positions you with your audience and what it frees you up to do next. That's the standard this proposal is written to.",
+approach:"We work in tight, visible phases. You see direction early — before significant hours are invested — so revisions happen at the sketch stage where they're cheap, not at the final stage where they're painful. Every phase ends with a concrete checkpoint and your sign-off before the next begins.",
+deliverables:["All final files in production-ready formats (print and digital)","Source/working files included — you own everything outright","A one-page usage guide so the work stays consistent after handoff","One round of post-delivery support for minor adjustments (14 days)"],
+process:["Discovery & direction — we align on goals, audience, and references; you approve a creative direction before design begins","Design & refinement — full execution with two structured revision rounds at defined checkpoints","Finalization & handoff — production files, usage guide, and a walkthrough so nothing gets lost in translation"],
+terms:["50% deposit to book the project and reserve the timeline; balance due at final delivery","Two revision rounds included; additional rounds billed at the agreed hourly rate","Timeline assumes feedback within 2 business days at each checkpoint"],
+closing:"If this looks right, reply and I'll send the deposit invoice and a start date — typically within one week of booking. If anything needs adjusting, tell me and I'll revise the proposal same-day. Either way, thank you for considering me for this."}),
+()=>({intro:`I've been thinking about ${vd('pr-proj','your project')} since we spoke, and I want to start with the honest version: this is a strong opportunity, and the difference between good and great here comes down to strategy before pixels. This proposal covers both.`,
+understanding:"Reading between the lines of what you described, the real goal isn't the asset — it's what the asset unlocks: more inbound interest, easier sales conversations, a brand that works while you don't. Success here is measured in responses, not just files delivered.",
+approach:"Strategy-first, always. Week one produces zero designs and maximum clarity: who this must convince, what they need to feel, and what one message everything supports. Then execution moves fast, because every decision already has an answer.",
+deliverables:["Strategic foundation document — positioning, audience, and message hierarchy","Full creative execution per the scope discussed","Adaptations for your three highest-priority channels","Editable templates so your team can extend the system without me"],
+process:["Strategy sprint — interviews, audit, and a one-page strategic brief you approve","Creative execution — concepts, your selection, full build-out of the chosen direction","Systemization — templates, guidelines, and handoff training call"],
+terms:["Three equal payments: booking, mid-project checkpoint, final delivery","Scope changes are welcomed but quoted before work begins — no surprise invoices","All strategy documents are yours regardless of how the engagement evolves"],
+closing:"Two things I can promise: you'll always know where the project stands, and you'll never receive work I wouldn't put my own name on. Ready when you are — the calendar fills first-come."}),
+()=>({intro:`Short version: yes, I can do this, here's exactly how, and here's what it costs. The longer version below covers the details, but I respect your time too much to bury the answer. ${vd('pr-client','You')} will know everything you need by the end of this page.`,
+understanding:"You have a clear need, a real deadline, and limited patience for agency theater. This proposal is structured accordingly: fixed scope, fixed price, fixed dates, and a process with exactly as many meetings as necessary — which is fewer than you'd expect.",
+approach:"Async-first execution. You'll receive progress updates at every milestone via a shared link — review on your schedule, comment in context, approve with one reply. We talk live only when a decision genuinely needs a conversation.",
+deliverables:["Complete project scope as specified, delivered in final formats","Organized file delivery with clear naming — usable by anyone on your team","Revision rounds built into each milestone, not bolted on at the end","Final walkthrough document: what was delivered, how to use it, what's next"],
+process:["Kickoff & alignment — one call, all decisions logged, direction locked","Production — milestone deliveries with async review at each stage","Delivery — final files, documentation, and a 7-day adjustment window"],
+terms:["50/50 payment split: booking and delivery","Feedback windows of 48 hours keep the timeline guaranteed","Rush delivery available at +25% if your deadline moves up"],
+closing:"If you want it done well and done on time without managing the process yourself, that's specifically what this is. Reply 'approved' and we start this week."}),
+()=>({intro:`Every project like ${vd('pr-proj','this one')} has the same hidden risk: looking finished without being effective. Plenty of providers can make something attractive. This proposal is about making something that works — and being able to tell the difference.`,
+understanding:"Your audience decides in seconds, compares you in tabs, and remembers almost nothing. The work has to survive that environment: instantly clear, visibly credible, and pointed at one action. Everything in this scope is justified against that test.",
+approach:"Evidence over taste. Where opinions would normally decide, we use reference testing, contrast checks, and message-first drafts. You'll never hear 'I just like it better' as a rationale — from me, and ideally not from anyone reviewing it.",
+deliverables:["Core deliverable set as scoped, optimized for your primary channel first","Performance checklist applied and documented — readability, hierarchy, action clarity","Secondary format adaptations so the work deploys everywhere it's needed","30-day check-in after launch to review real-world performance"],
+process:["Diagnostic — audit of current materials and a gap analysis against goals","Build — execution with checkpoint reviews tied to the performance checklist","Launch support — delivery, deployment guidance, and the 30-day review"],
+terms:["Deposit secures start date; milestone payment at build approval; balance at delivery","The 30-day review is included — adjustments it surfaces are quoted separately if outside scope","Either party may pause with one week's notice; completed phases are billable"],
+closing:"The 30-day review is where this proposal differs from most: I stay interested in whether it worked. If that's the kind of partner you're looking for, let's set the start date."}),
+()=>({intro:`Thank you for the conversation about ${vd('pr-proj','the project')} — it's clear you've already done serious thinking, which makes my job better. This proposal matches the level of intent you brought: a premium process for work that deserves it.`,
+understanding:"This isn't a commodity purchase and you're not shopping on price — you're choosing who you trust with something that represents you. The process below is built for that level of stakes: more discovery, more craft time, and a finish standard most timelines don't allow.",
+approach:"Fewer projects, deeper focus. Your engagement gets a dedicated block in the calendar — no juggling, no context-switching, no B-team. Each phase includes craft time that doesn't appear in a task list but absolutely appears in the final result.",
+deliverables:["Flagship deliverable executed to presentation grade","Full supporting system: variants, formats, and edge cases handled","Premium presentation of the work — you see it the way your audience will","Lifetime file access and a 30-day refinement window"],
+process:["Immersion — deep discovery into your world, audience, and ambitions","Craft — concept development, selection, and meticulous execution","Reveal & refine — full presentation, refinement window, and complete handoff"],
+terms:["50% booking deposit reserves the dedicated calendar block","Balance due at the reveal presentation","One major refinement round plus unlimited minor adjustments within 30 days"],
+closing:"I take a limited number of these engagements per quarter so each gets the attention this level of work requires. If the timing aligns, I'd be glad to reserve your block — the next opening is soon, and I'd love it to be this."})];
+
+/* ───────── INVOICE — dynamic generator (builds real invoices from user input) ───────── */
+DEMO.invoice=[()=>{
+  const lines=(v('inv-items')||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const items=(lines.length?lines:['Design services — project work | 850','Revisions & refinement | 150']).map(l=>{
+    const m=l.match(/(?:[-–|:]\s*)?\$?\s*([\d,]+(?:\.\d{1,2})?)\s*$/);
+    const amt=m?parseFloat(m[1].replace(/,/g,'')):0;
+    const desc=m?l.slice(0,m.index).replace(/[-–|:]\s*$/,'').trim()||'Services':l;
+    return{description:desc,amount:amt>0?('$'+amt.toLocaleString(undefined,{minimumFractionDigits:2})):'—',_n:amt};
+  });
+  const sub=items.reduce((s,i)=>s+i._n,0);
+  const num='INV-'+new Date().getFullYear()+'-'+String(Math.floor(100+Math.random()*900));
+  return{invoice_num:num,items:items.map(({description,amount})=>({description,amount})),
+    subtotal:sub>0?('$'+sub.toLocaleString(undefined,{minimumFractionDigits:2})):'See items',
+    total:sub>0?('$'+sub.toLocaleString(undefined,{minimumFractionDigits:2})):'See items',
+    notes:"Thank you for your business. Please reference the invoice number with your payment. Questions about this invoice? Reply directly and I'll respond within one business day."};
+}];
+
+/* ───────── SCOPE CALCULATOR — 5 variations ───────── */
+DEMO.scope=[
+()=>({deliverables:[
+{name:"Discovery & creative direction",hours:6,notes:"Questionnaire review, references, direction deck — skipping this is where revisions multiply"},
+{name:"Primary logo design & concepts",hours:10,notes:"Three concept routes, refinement of selected direction"},
+{name:"Color & typography system",hours:5,notes:"Palette with usage rules, type pairing and hierarchy"},
+{name:"Brand applications & mockups",hours:6,notes:"Real-world previews: social, print, signage contexts"},
+{name:"Brand guide & file packaging",hours:5,notes:"Usage one-pager plus organized final delivery"}],
+total_hours:32,recommended_price:"$2,400 – $3,200",
+buffer_note:"Quoted hours assume two revision rounds. Identity projects attract 'one more small tweak' requests — your contract language matters as much as your estimate.",
+payment_structure:["50% deposit to begin, 50% at final file delivery","Alternative: thirds — booking, concept approval, delivery — for budgets over $3K"]}),
+()=>({deliverables:[
+{name:"Content & sitemap planning",hours:8,notes:"Page architecture and copy framework before any design — protects the whole timeline"},
+{name:"Homepage design (desktop + mobile)",hours:12,notes:"The conversion-critical page; budget reflects its weight"},
+{name:"Interior page templates (×3)",hours:14,notes:"About, services, contact — designed as a reusable system"},
+{name:"Build & responsive development",hours:18,notes:"Implementation, device testing, performance pass"},
+{name:"Launch: forms, analytics, QA",hours:6,notes:"The unglamorous hours clients only notice when skipped"}],
+total_hours:58,recommended_price:"$4,600 – $6,400",
+buffer_note:"Add 15% if client content arrives 'next week' — it never does. Content delays are the number one website timeline killer; tie your schedule to content receipt, not calendar dates.",
+payment_structure:["Thirds: project start, design approval, launch","Monthly retainer conversion available for ongoing updates post-launch"]}),
+()=>({deliverables:[
+{name:"Strategy & format planning",hours:3,notes:"Platform priorities, content pillars, sizing matrix"},
+{name:"Master template design",hours:6,notes:"The hero format everything else derives from"},
+{name:"Variant templates (×4)",hours:6,notes:"Quote, announcement, carousel, story formats"},
+{name:"Packaging for client editing",hours:3,notes:"Organized editable files with a quick-start guide"}],
+total_hours:18,recommended_price:"$1,200 – $1,700",
+buffer_note:"Template projects scope-creep through 'can you also make one for…' — price additional formats up front ($150–250 each) so the answer is always an easy yes.",
+payment_structure:["50/50 split: booking and delivery","Full prepay option with 10% courtesy discount for fast-turnaround requests"]}),
+()=>({deliverables:[
+{name:"Packaging audit & references",hours:5,notes:"Competitive shelf review and structural options"},
+{name:"Primary panel design",hours:12,notes:"The face of the product — concept through refinement"},
+{name:"Full dieline & secondary panels",hours:10,notes:"All faces, regulatory text placement, fold logic"},
+{name:"Print preparation & proofing",hours:8,notes:"Color specs, printer coordination, physical proof review"},
+{name:"Listing imagery direction",hours:5,notes:"Flat renders and photo direction for e-commerce"}],
+total_hours:40,recommended_price:"$3,200 – $4,500",
+buffer_note:"Always include one physical proof round in scope and schedule. Screen-to-print color surprises are not an 'if' — budget the week and the courier costs now.",
+payment_structure:["Thirds: booking, design approval, print-ready delivery","Print management billed separately at cost +15% if you coordinate the printer"]}),
+()=>({deliverables:[
+{name:"Narrative & slide architecture",hours:6,notes:"The story order — this is half the deck's value"},
+{name:"Master slide system design",hours:7,notes:"Title, content, data, and section layouts as a kit"},
+{name:"Full deck build (≈15 slides)",hours:8,notes:"Population, charts, and visual consistency pass"},
+{name:"Revision & presentation prep",hours:3,notes:"Final round plus presenter notes formatting"}],
+total_hours:24,recommended_price:"$1,800 – $2,600",
+buffer_note:"Decks are deadline-driven and deadlines move in one direction. Build in a 48-hour buffer before their real date — and charge rush rates when 'the meeting moved up' arrives.",
+payment_structure:["50% at booking, 50% at delivery","Rush surcharge of 25% inside one-week turnarounds — state it before they need it"]})];
+
+/* ───────── CLIENT QUESTIONNAIRE — 5 variations ───────── */
+DEMO.questionnaire=[
+()=>({sections:[
+{title:"The Business Reality",questions:["In one sentence, what do you sell and who buys it most often?","What does a customer say when they recommend you to a friend — their actual words?","Where does most of your revenue come from today, and where do you want it to come from in two years?"]},
+{title:"The Brand Gut-Check",questions:["Name two brands (any industry) whose presence you admire — what specifically do they do that you wish you did?","If your brand were a person at a party, how would they talk and dress?","What's something your industry always does visually that you'd be relieved to never do?"]},
+{title:"The Practical Frame",questions:["Where will this brand show up most: screens, print, packaging, or physical space?","Who has final approval, and who else will give input along the way?","What does success look like 90 days after delivery — what specifically has changed?"]}]}),
+()=>({sections:[
+{title:"Visitors & Intent",questions:["Who lands on your site most often, and what did they probably click to get there?","What's the ONE action you most want a visitor to take before leaving?","What question do prospects always ask that the current site fails to answer?"]},
+{title:"Content & Proof",questions:["What proof do you have that you're good — results, reviews, numbers, names — and can we use it?","Which existing pages or materials contain copy worth keeping?","Who is writing the new copy — you, me, or are we polishing what exists?"]},
+{title:"Scope Guardrails",questions:["What's the realistic launch deadline, and what's driving that date?","Are there technical requirements — booking, payments, integrations — beyond informational pages?","What budget range are we designing within? (A real number makes every recommendation better.)"]}]}),
+()=>({sections:[
+{title:"Why Now",questions:["What changed that makes a rebrand necessary now rather than last year?","What should the new brand keep from the old one — and what must not survive the transition?","Who might resist this change (customers, team, partners), and what do they value about the current brand?"]},
+{title:"Position & Competition",questions:["Who do you lose deals to, and what do prospects say when they choose them?","Complete this: 'Unlike our competitors, we ___' — with something provable.","Is the rebrand repositioning the business, or re-dressing the same position?"]},
+{title:"Rollout Reality",questions:["List everything carrying the current brand: signage, vehicles, packaging, profiles, templates — what's the full replacement surface?","Is the rollout a hard cutover or a phased transition, and over what period?","What's the announcement plan — does the rebrand launch quietly or as a story?"]}]}),
+()=>({sections:[
+{title:"Product Truths",questions:["What is the product, what does it cost, and what does it sit next to on a shelf or search page?","What's the first thing a customer must understand within two seconds of seeing the package?","Are there regulatory or required elements — ingredients, warnings, certifications — and do you have final text?"]},
+{title:"Customer Moment",questions:["Describe the buying moment: in-store comparison, online scroll, gift purchase, or repeat order?","What should the customer feel when the package is in their hands for the first time?","Will this be unboxed on camera — is shareability a design requirement?"]},
+{title:"Production Facts",questions:["What's the packaging structure and material, and is a printer already selected?","How many SKUs or variants now, and how many within a year?","What's the per-unit print budget — does it support special finishes, or is this a smart-with-two-colors project?"]}]}),
+()=>({sections:[
+{title:"Campaign Core",questions:["What exactly are we promoting, and what single action counts as a conversion?","What's the offer's honest urgency — real deadline, real limit, or evergreen?","What's the campaign's one-line message if you could only say seven words?"]},
+{title:"Audience & Channels",questions:["Who is this for — and are we reaching your existing audience, a cold one, or both?","Which channels are confirmed: organic social, email, paid, print, in-person?","What's worked before with this audience, and what flopped? (Both answers shape this.)"]},
+{title:"Assets & Timeline",questions:["What already exists — photos, video, logos, past campaign files — and what must be created?","Key dates: launch, peak push, deadline. What's immovable?","Who posts and schedules — you, your team, or is delivery-ready scheduling part of my scope?"]}]})];
+
+/* ───────── CLIENT FEEDBACK TRANSLATOR — 5 variations ───────── */
+DEMO.translator=[
+()=>({reacting_to:"\"Make it pop\" almost always means the design feels flat to them — they can't point to a focal point, so nothing feels exciting. It's a contrast and hierarchy complaint wearing an energy costume.",
+want_instead:"One element that obviously dominates. They want to look at the design and instantly know where the action is — they're asking for drama, and drama is just contrast with confidence.",
+changes:["Take the single most important element and increase its size or color contrast by 50% — past the point that feels safe","Mute everything secondary: reduce competing elements' saturation so the hero owns the frame","Add one high-contrast accent moment (color pop, scale break) the eye can't skip"],
+reply:"\"Great note — I'm going to push the contrast so the main message jumps first. You'll see a version where the hero element really commands the layout. If it goes too far, we can pull back 10%, but I'd rather show you bold than safe.\""}),
+()=>({reacting_to:"\"It looks too corporate\" means the design reads as belonging to a big, faceless company — usually triggered by stock-feeling imagery, safe blues, default fonts, and perfectly symmetrical layouts.",
+want_instead:"Evidence of humans. They want the brand's actual personality visible — warmth, specificity, a little imperfection. They're asking for character, not chaos.",
+changes:["Swap stock or generic imagery for something specific to them: real product, real workspace, real people","Introduce one personality element — a hand-drawn detail, a candid photo, an unexpected color — that a corporation would commit-review to death","Loosen the layout: break perfect symmetry in one deliberate place so it feels composed by a person"],
+reply:"\"Totally hear it — it's polished but it's not YOU yet. I'm going to bring in more of your actual personality: real imagery, a warmer palette moment, and a layout that feels less boardroom. Polish stays; the suit-and-tie goes.\""}),
+()=>({reacting_to:"\"Can we try more colors?\" is rarely about quantity — the current palette feels monotonous or somber to them. One hue is doing all the work and the design feels like it's wearing a uniform.",
+want_instead:"Variety and life within the existing system — different tints, a warm accent, more color contrast between sections. They want the design to feel generous, not rainbow.",
+changes:["Expand the current palette vertically: add light and dark tints of existing colors before adding any new hue","Introduce exactly one complementary accent for highlights — one, defended firmly","Vary section backgrounds (alternating tints) so scrolling feels like movement through a palette, not one long color"],
+reply:"\"Love the instinct — I'm going to open the palette up with tints and one new accent so it feels richer, while keeping it cohesive enough to stay recognizably yours. More color, same brand.\""}),
+()=>({reacting_to:"\"It doesn't feel like us\" is an identity mismatch — the design contradicts their self-image somewhere: too playful for their seriousness, too stiff for their warmth, too trendy for their permanence. They can feel it but can't name it.",
+want_instead:"They want to recognize themselves. The fix starts with diagnosis, not redesign — you need the adjective gap: what the design says versus what they'd say about themselves.",
+changes:["Ask them for three words customers use to describe them, then audit each design element against those words","Identify the loudest mismatch (usually typography or imagery tone) and correct that single element first","Present the corrected version beside the original with the three words as the scoring criteria — make 'feels like us' measurable"],
+reply:"\"That's actually the most useful note you can give me. Quick question so I nail it: what three words would your best customer use to describe you? I'll line the design up against those — I suspect one element is off-character and I want to fix the right one.\""}),
+()=>({reacting_to:"\"Make the logo bigger\" usually isn't logo pride — it's a visibility anxiety. They worry the brand won't be remembered, often because the logo sits in a crowded area or low-contrast spot where it genuinely does disappear.",
+want_instead:"Confidence that the brand registers. That can come from placement, isolation, and contrast — frequently WITHOUT increasing size. They want presence; size is just the only lever they know to name.",
+changes:["Clear a protected zone around the logo — empty space makes marks feel larger and more important at the same size","Relocate or re-contrast it: corner anchor position, stronger color against its background","If size truly must grow, grow it 15–20% and pair it with isolation — controlled increase reads premium; doubling reads desperate"],
+reply:"\"I'll make sure the brand really registers — sometimes that's size, but often it's giving the logo room to breathe and stronger contrast so it pops at any size. I'll send a version where it's unmissable, and if you still want it physically larger after that, easy adjustment.\""})];
+
+/* ───────── CAPTIONS — 5 variations ───────── */
+DEMO.captions=[
+()=>({tiktok:`POV: you finally stopped overthinking ${vd('cap-topic','it')} and just shipped. Nobody's judging your version one as hard as you are — they're too busy not starting their own. ${vd('cap-cta','Link in bio')} if you're done waiting.`,
+instagram:`Unpopular truth: done and posted beats perfect and private. Every. Single. Time.\n\n${vd('cap-topic','This')} took longer to overthink than it took to make. Learn from me — ship the thing.\n\nSave this for the next time you're stalling. ${vd('cap-cta','Link in bio')}.`,
+linkedin:`A pattern I keep seeing: the gap between people who grow and people who stall isn't talent — it's publishing tolerance.\n\nThe ones who win put work out before it feels ready, collect real feedback, and improve in public. The ones who stall polish in private, waiting for a confidence that only shipping creates.\n\n${vd('cap-topic','My latest project')} is live now. Imperfect, public, and already teaching me more than another month of editing would have.`,
+x:`The work you're hiding at 90% done is worth more than the perfect version that never ships. ${vd('cap-topic','Mine')} is live. ${vd('cap-cta','Link below')}.`}),
+()=>({tiktok:`3 things nobody tells you about ${vd('cap-topic','this')}: 1) the start is the hardest 10%, 2) consistency beats intensity by a mile, 3) the people who 'got lucky' have receipts going back years. Which one hit? 👇`,
+instagram:`Three truths about ${vd('cap-topic','the process')} I wish someone told me earlier:\n\n1. Starting badly beats waiting brilliantly.\n2. Boring consistency builds what dramatic effort can't.\n3. Every overnight success has a long, unphotogenic backstory.\n\nDouble tap if number 2 called you out. ${vd('cap-cta','Link in bio')} when you're ready.`,
+linkedin:`Three lessons from ${vd('cap-topic','this work')} that apply to almost everything:\n\n1. Imperfect action compounds. Perfect planning doesn't.\n2. The boring middle — where most people quit — is where the results are actually built.\n3. Visibility is a skill, not a personality trait. It can be learned deliberately.\n\nWhich of these is your current battle? Genuinely curious what others are seeing.`,
+x:`Hard truths, free of charge:\n- starting badly > waiting brilliantly\n- consistency > intensity\n- shipped > perfect\n\n${vd('cap-topic','The work')} proves it. ${vd('cap-cta','Link in bio')}.`}),
+()=>({tiktok:`I wasn't going to share this but… here's the exact behind-the-scenes of ${vd('cap-topic','the thing')} — the messy version, not the highlight reel. Watch to the end before the polished post drops tomorrow. 👀`,
+instagram:`The version you see vs. the version it took. 🧵\n\nEveryone posts the after. Here's the during — the drafts, the doubts, the 11pm 'is this even good' spiral. ${vd('cap-topic','This')} didn't arrive finished. Nothing does.\n\nIf you're in your messy middle right now: that's not a sign to stop. That's the part that counts.\n\n${vd('cap-cta','Link in bio')} for the finished version.`,
+linkedin:`We talk a lot about results and almost never about drafts.\n\nSo here's mine: ${vd('cap-topic','this project')} went through versions I'd never post, feedback that stung, and at least one full restart. The polished outcome you'll see exists because of that mess, not despite it.\n\nNormalize showing the middle. It's where all the actual learning lives.`,
+x:`The final version of ${vd('cap-topic','this')} took 1 day.\nGetting to the final version took 30.\nNobody posts the 30. So I am. ${vd('cap-cta','Link below')}.`}),
+()=>({tiktok:`Reply to the person who said this wouldn't work: ${vd('cap-topic','the results')} are in and I'll let the numbers do the talking. Full breakdown pinned. ${vd('cap-cta','Link in bio')} 🔵`,
+instagram:`Receipts > opinions.\n\nWhen I started ${vd('cap-topic','this')}, the feedback was 'too crowded,' 'too late,' 'too ambitious.' Noted. Anyway — here's what happened instead.\n\nSwipe for the proof. Then go build the thing they told YOU was too much.\n\n${vd('cap-cta','Link in bio')} to start.`,
+linkedin:`A short story about ignoring consensus:\n\nWhen ${vd('cap-topic','this initiative')} started, the sensible advice was to wait, scale down, or skip it entirely. The results — which I'm sharing transparently in this post — suggest the sensible advice would have been expensive.\n\nLesson: consensus is a measure of comfort, not correctness. The data decides.\n\nDetails in the comments.`,
+x:`They said ${vd('cap-topic','it')} wouldn't work.\n\nIt worked.\n\nThat's the post. ${vd('cap-cta','Receipts at the link')}.`}),
+()=>({tiktok:`If you only learn ONE thing about ${vd('cap-topic','this')} today, make it this 60-second version. No fluff, no 'smash that follow' — just the part that actually matters. Rewatch it, you'll catch more the second time.`,
+instagram:`The 60-second masterclass on ${vd('cap-topic','this')}: ⤵️\n\nEverything else is detail. This is the core. Save it — you'll want it exactly when you don't have time to search for it.\n\nWant the full deep-dive version? ${vd('cap-cta','Link in bio')}.`,
+linkedin:`I've spent a long time on ${vd('cap-topic','this topic')}, and if I had to compress everything into one principle a busy person could actually use, it's in this post.\n\nNo framework with seven steps. No acronym. One principle, applied consistently, outperforms the complicated systems — because it actually gets used.\n\nThe principle and how to apply it: in the post below.`,
+x:`${vd('cap-topic','Everything')}, compressed into one sentence you can actually use today. No thread. No course. Just this: consistency applied to one clear thing beats intensity scattered across five. ${vd('cap-cta','More at the link')}.`})];
+
+/* ───────── CONTENT CALENDAR — 3 variations ───────── */
+DEMO.calendar=[
+()=>({theme:`Authority in 30 Days — positioning ${vd('cal-brand','the brand')} as the obvious expert`,weeks:[
+{week:1,focus:"Plant the flag",posts:[
+{day:1,type:"Statement",topic:"The bold belief post: what you stand for, in one strong claim"},
+{day:2,type:"Education",topic:"Beginner mistake #1 in your niche — and the 60-second fix"},
+{day:3,type:"Story",topic:"Origin story: the moment you decided to do this differently"},
+{day:4,type:"Proof",topic:"A result, review, or number — let evidence talk"},
+{day:5,type:"Education",topic:"The tool/method you swear by and exactly how you use it"},
+{day:6,type:"Engagement",topic:"This-or-that poll relevant to your audience's daily choice"},
+{day:7,type:"Recap",topic:"Week 1 lessons + tease what's coming — train the return visit"}]},
+{week:2,focus:"Teach generously",posts:[
+{day:8,type:"Tutorial",topic:"Full step-by-step: solve one real problem completely, free"},
+{day:9,type:"Myth-bust",topic:"The popular advice in your niche that's actually wrong"},
+{day:10,type:"Behind-scenes",topic:"Your actual process — the unglamorous middle, shown proudly"},
+{day:11,type:"Education",topic:"Before/after breakdown: what changed and why it worked"},
+{day:12,type:"Story",topic:"A failure that taught you the thing you now teach"},
+{day:13,type:"Engagement",topic:"Ask: 'What's your biggest struggle with X?' — mine the replies for content"},
+{day:14,type:"Soft CTA",topic:"How you help, stated plainly + one client outcome"}]}]}),
+()=>({theme:`Launch Momentum — building a 30-day runway for ${vd('cal-brand','your offer')}`,weeks:[
+{week:1,focus:"Seed the problem",posts:[
+{day:1,type:"Problem",topic:"Name the pain: the frustrating thing your audience tolerates daily"},
+{day:2,type:"Agitate",topic:"The real cost of that problem — time, money, energy, in numbers"},
+{day:3,type:"Story",topic:"Your own experience with this exact problem before you solved it"},
+{day:4,type:"Education",topic:"Why the common solutions fall short (sets up yours, without naming it)"},
+{day:5,type:"Tease",topic:"'I've been building something' — first hint, zero details"},
+{day:6,type:"Engagement",topic:"Poll: which version of this problem hits hardest? (also: market research)"},
+{day:7,type:"Behind-scenes",topic:"Building-in-public peek: a corner of the thing, not the whole thing"}]},
+{week:2,focus:"Reveal and warm up",posts:[
+{day:8,type:"Reveal",topic:"The announcement: what it is, who it's for, when it drops"},
+{day:9,type:"Feature",topic:"Deep-dive on the #1 most valuable piece of the offer"},
+{day:10,type:"Objection",topic:"Answer the biggest hesitation head-on, before they ask"},
+{day:11,type:"Proof",topic:"Early access result, beta feedback, or your own results with it"},
+{day:12,type:"Feature",topic:"The unexpected bonus — the part that makes people say 'wait, that too?'"},
+{day:13,type:"Story",topic:"Why you priced/built it this way — transparency builds trust"},
+{day:14,type:"Countdown",topic:"One week out: date, time, and what early buyers get"}]}]}),
+()=>({theme:`Community First — turning ${vd('cal-brand','your')} followers into a crowd that talks back`,weeks:[
+{week:1,focus:"Open the doors",posts:[
+{day:1,type:"Welcome",topic:"Re-introduction: who you are, who this page is for, what to expect"},
+{day:2,type:"Value",topic:"Your single most-saved tip, repackaged for new followers"},
+{day:3,type:"Question",topic:"Genuine ask: what should I make more of? (then actually do it)"},
+{day:4,type:"Spotlight",topic:"Feature a follower, customer, or community win — with permission and tags"},
+{day:5,type:"Personal",topic:"A non-business post: the human behind the brand, once a week"},
+{day:6,type:"Education",topic:"Quick win Saturday: something they can do in 5 minutes today"},
+{day:7,type:"Recap",topic:"Best comment of the week, highlighted — reward participation publicly"}]},
+{week:2,focus:"Make it theirs",posts:[
+{day:8,type:"Challenge",topic:"Launch a 5-day mini challenge with a branded hashtag"},
+{day:9,type:"Education",topic:"Challenge support content: tips for day-one participants"},
+{day:10,type:"Spotlight",topic:"Repost the best challenge entries — fuel the fire"},
+{day:11,type:"Story",topic:"Why community is the strategy — your honest take"},
+{day:12,type:"Engagement",topic:"Caption-this or fill-in-the-blank post — low effort, high replies"},
+{day:13,type:"Value",topic:"Resource roundup: 5 things you recommend, none of them yours"},
+{day:14,type:"Celebration",topic:"Challenge wrap: winners, numbers, and the announcement it's now monthly"}]}]})];
+
+/* ───────── HASHTAGS — 5 variations ───────── */
+DEMO.hashtags=[
+()=>({strategy:"Ladder strategy: broad tags get you sampled, mid tags get you ranked, niche tags get you discovered by buyers. Use all three tiers on every post — most accounts only use the broad tier and wonder why reach plateaus.",
+sets:[{tier:"Broad (1M+)",tags:["smallbusiness","entrepreneur","branding"],note:"High volume, fast decay — these put you in the river, not on the shore"},
+{tier:"Mid (100K-1M)",tags:["brandidentity","smallbusinessowner","creativeentrepreneur","designinspiration"],note:"The ranking sweet spot — competitive but winnable with strong content"},
+{tier:"Niche (<100K)",tags:["brandingforsmallbusiness","logodesigner","femalefounders","brandstrategytips","solopreneurlife"],note:"Lower volume, higher intent — the people searching these are closer to buying"}],
+branded:[`${(vd('h-brand','YourBrand')).replace(/[^a-zA-Z0-9]/g,'')}`,"GlowDifferent"],
+tip:"Rotate three different tag sets across your posts instead of pasting the same block — repeated identical tag blocks can suppress reach, and rotation shows you which tier actually drives your discovery."}),
+()=>({strategy:"Intent-first selection: choose tags by what the searcher wants to DO, not just the topic. 'Inspiration' tags attract scrollers; 'how to' and 'tips' tags attract doers; product tags attract buyers. Match tags to the post's job.",
+sets:[{tier:"Broad (1M+)",tags:["marketing","contentcreator","businesstips"],note:"Awareness only — expect impressions here, not conversions"},
+{tier:"Mid (100K-1M)",tags:["contentmarketingtips","socialmediastrategy","digitalproducts","onlinebusinesstips"],note:"Doer tags — people learning skills, primed to follow educators"},
+{tier:"Niche (<100K)",tags:["digitalproductcreator","passiveincomeideas2026","sellonbeacons","creatoreconomytips","aiforbusiness"],note:"Buyer-adjacent — small ponds where you can be the biggest fish this month"}],
+branded:[`${(vd('h-brand','YourBrand')).replace(/[^a-zA-Z0-9]/g,'')}`,"RiseAndHustle"],
+tip:"Search each niche tag before using it and check the top posts' dates — a tag whose top posts are months old is a tag with low competition AND low traffic. You want recent top posts with engagement you can realistically beat."}),
+()=>({strategy:"Local + vertical stacking: pair geography tags with industry tags so you rank in two discovery systems at once. A city tag alone reaches everyone nearby; stacked with your vertical, it reaches the right people nearby.",
+sets:[{tier:"Broad (1M+)",tags:["nyc","newyork","shoplocal"],note:"Geographic mass — useful mostly as the anchor for the stack below"},
+{tier:"Mid (100K-1M)",tags:["nycsmallbusiness","newyorkentrepreneur","madeinnyc","nyccreatives"],note:"The stack working: place + identity tags where local press and partners scout"},
+{tier:"Niche (<100K)",tags:["brooklynsmallbusiness","nycfounder","blackownednyc","nycdesigner","queensentrepreneur"],note:"Hyper-local discovery — these convert to real-world customers and collabs"}],
+branded:[`${(vd('h-brand','YourBrand')).replace(/[^a-zA-Z0-9]/g,'')}`,"GlowDifferent"],
+tip:"Local tags have an offline payoff most people miss: journalists, event organizers, and potential collaborators search them when looking for businesses to feature. One well-tagged post can become a press mention."}),
+()=>({strategy:"Trend-surfing with an anchor: ride one trending or seasonal tag per post for the reach spike, anchored by your evergreen niche set for lasting discovery. The trend gets you the first 24 hours; the evergreen tags work for months.",
+sets:[{tier:"Broad (1M+)",tags:["trending","viral","fyp"],note:"Pure velocity tags — only worth it when the content genuinely fits the moment"},
+{tier:"Mid (100K-1M)",tags:["2026trends","newyearnewbusiness","summerlaunch","contentcreatortips"],note:"Seasonal mid-tier — swap these monthly; stale seasonal tags signal stale accounts"},
+{tier:"Niche (<100K)",tags:["launchweek","buildinpublic","founderjourney","smallbizcheck","behindthebusiness"],note:"Evergreen anchors — the consistent discovery engine under the trend spikes"}],
+branded:[`${(vd('h-brand','YourBrand')).replace(/[^a-zA-Z0-9]/g,'')}`,"BleuDreams"],
+tip:"Set a monthly 15-minute 'tag audit': retire anything seasonal that expired, check which niche tags actually appear in your reach insights, and replace the bottom two performers. Tags are a garden, not a tattoo."}),
+()=>({strategy:"Community embedding: prioritize tags that real communities actively check and post to — not just high-volume topics. Community tags have members, not just metrics; showing up there consistently builds recognition tag-by-tag.",
+sets:[{tier:"Broad (1M+)",tags:["womeninbusiness","creativecommunity","hustle"],note:"Identity-based broad tags — warmer than topic tags at the same volume"},
+{tier:"Mid (100K-1M)",tags:["womenwhohustle","over50entrepreneur","mobileentrepreneur","sidehustletofulltime"],note:"Active communities — comment on top posts here before posting your own"},
+{tier:"Niche (<100K)",tags:["iphoneentrepreneur","buildfromyourphone","midlifeentrepreneur","founderover50","dreambigstartsmall"],note:"Your people specifically — small tags where your story is the standout, not the noise"}],
+branded:[`${(vd('h-brand','YourBrand')).replace(/[^a-zA-Z0-9]/g,'')}`,"StayGlowing"],
+tip:"In community tags, engagement BEFORE posting multiplies reach: spend 10 minutes leaving real comments on a tag's recent posts, then publish with that tag. The algorithm and the humans both notice you're a member, not a tourist."})];
+
+/* ───────── HOOKS — 5 variations (25 hooks) ───────── */
+DEMO.hooks=[
+()=>({hooks:[
+{type:"Contrarian",hook:`Everything you've been told about ${vd('hk-topic','this')} is backwards — and it's costing you every single day.`},
+{type:"Curiosity gap",hook:`I found the one thing nobody mentions about ${vd('hk-topic','this')} — and it changes the whole game.`},
+{type:"Direct callout",hook:`If you've been struggling with ${vd('hk-topic','this')}, stop scrolling. This is the post you needed.`},
+{type:"Stakes",hook:`The difference between getting ${vd('hk-topic','this')} right and wrong is bigger than you think. Here's the line.`},
+{type:"Pattern interrupt",hook:"Delete everything you saved on this topic. You only need what's in the next 30 seconds."}]}),
+()=>({hooks:[
+{type:"Numbers",hook:`3 mistakes, 2 fixes, 1 rule — everything about ${vd('hk-topic','this')} in under a minute.`},
+{type:"Confession",hook:`I did ${vd('hk-topic','this')} wrong for years. Here's what finally fixed it — so you can skip the years part.`},
+{type:"Challenge",hook:"Try this for 7 days. If nothing changes, come back and tell me — but nobody ever comes back to complain."},
+{type:"Insider",hook:`What the people winning at ${vd('hk-topic','this')} do differently — that they'll never put in a tutorial.`},
+{type:"Time-based",hook:"You have 15 seconds of attention to give me. I need 12 of them. Watch."}]}),
+()=>({hooks:[
+{type:"Question",hook:`What if ${vd('hk-topic','the thing you keep putting off')} only takes 20 minutes when you do it the right way?`},
+{type:"Story open",hook:"Last month someone told me this would never work. This week the results came in. Let me show you."},
+{type:"Specificity",hook:`The exact 4-step process I use for ${vd('hk-topic','this')} — screenshots included, nothing held back.`},
+{type:"Warning",hook:`Before you spend another dollar on ${vd('hk-topic','this')}, watch this. You'll thank me at checkout.`},
+{type:"Identity",hook:"This is for the ones building quietly while everyone else is performing loudly. You'll know if it's you."}]}),
+()=>({hooks:[
+{type:"Reverse",hook:`Stop trying to get better at ${vd('hk-topic','this')}. Start removing what's making it hard. Watch the difference.`},
+{type:"Proof first",hook:"Here's the result first. Now let me work backwards and show you exactly how it happened."},
+{type:"Comparison",hook:`I tested both ways of doing ${vd('hk-topic','this')} for 30 days. One of them isn't even close.`},
+{type:"FOMO",hook:"The people who figure this out early are going to be insufferable about it later. Be one of them."},
+{type:"Simplicity",hook:`${vd('hk-topic','This')} in one sentence — because if it takes a whole course to explain, someone's selling you something.`}]}),
+()=>({hooks:[
+{type:"Bold claim",hook:`This is the single highest-leverage thing you can do about ${vd('hk-topic','this')} — and it's free.`},
+{type:"Relatability",hook:"POV: it's 11pm, you said you'd start tomorrow again, and this video just called you out personally."},
+{type:"Authority",hook:`After doing ${vd('hk-topic','this')} more times than I can count, here's the only advice that survived everything.`},
+{type:"Open loop",hook:"The third one on this list is the reason this post exists. But the first two set it up — don't skip."},
+{type:"Permission",hook:"You're allowed to do this the simple way. In fact, here's your official permission slip — and the simple way itself."}]})];
+
+/* ───────── MOCKUP STUDIO™ — 8 types × 3 variations (24 concepts) ───────── */
+const _mb=()=>vd('mk-brand','the brand');const _mc=()=>vd('mk-concept','the concept');
+DEMO.mockup={
+logo:[
+()=>({mockup_title:"The Foundation Mark",design_concept:`A confident wordmark-first identity for ${_mb()} — typography customized just enough to be ownable, presented on materials that prove it works everywhere from app icon to storefront.`,
+visual_direction:{layout:"Centered mark on generous negative space; presentation grid showing 6 real applications around the hero lockup",color_approach:"One dominant brand color plus near-black and warm white — the three-color discipline that signals an established brand",typography:"Modified geometric sans with one signature letterform alteration; spaced-caps secondary line for taglines",imagery:"Photographed contexts: embossed on paper stock, on a phone screen, on signage at dusk — tangibility sells identity work"},
+key_elements:["Primary lockup with the signature modified letter clearly visible","Simplified icon version proving 32px legibility","Mono and reversed variants on light and dark fields","Clear-space and minimum-size specification panel"],
+presentation_strategy:"Lead with the mark alone for three full seconds of silence, then reveal the application grid — let the client fall for the idea before seeing the proof.",
+client_angle:"This mark costs the same to reproduce everywhere — embroidery, print, favicon — because restraint was a design requirement, not a budget compromise.",
+what_makes_it_work:"One customized letterform gives lawyers something to protect and fans something to recognize — distinctiveness with a single decision.",
+production_notes:["Deliver SVG masters plus PNG export set at standard sizes","Test embroidery legibility at 2-inch width before finalizing stroke weights","Lock the clear-space rule into the brand sheet — it's the first rule clients break"]}),
+()=>({mockup_title:"The Badge System",design_concept:`A contained emblem identity for ${_mb()} built like a maker's stamp — instant heritage feel, engineered to look at home on packaging, merch, and profile circles alike.`,
+visual_direction:{layout:"Circular containment with arched name, central icon, and founding detail — presented stamped, foiled, and stickered across surfaces",color_approach:"Deep heritage primary with a metallic-feel accent; full single-color fallback designed first, not retrofitted",typography:"Engraved-style caps for the arc, hairline sans for supporting details — contrast inside the badge itself",imagery:"Texture-forward mockups: kraft paper, wax-seal vibes, denim patches — materials that amplify the heritage story"},
+key_elements:["Master badge with all detail at full size","Simplified 'small badge' variant with reduced detail for sub-1-inch uses","Horizontal lockup escape-hatch for wide formats","Sticker sheet mockup — badges sell merch by existing"],
+presentation_strategy:"Present the badge ON things, never floating — a badge's entire argument is how it transforms ordinary surfaces into branded ones.",
+client_angle:"Badges buy credibility a young brand hasn't had time to earn — this design borrows a century of visual trust and makes it yours on day one.",
+what_makes_it_work:"Containment creates portability: the same sealed unit works as app icon, bottle stamp, embroidered patch, and watermark without redesign.",
+production_notes:["Build the simplified variant in parallel, not after — detail loss must be designed, not suffered","Spec metallic accent as both foil and flat-color simulation for budget print runs","Provide a 1-inch physical print test before approving final line weights"]}),
+()=>({mockup_title:"The Living Mark",design_concept:`A dynamic identity for ${_mb()} where one element of the mark adapts across contexts — stable enough to recognize, alive enough to never feel like a stamp.`,
+visual_direction:{layout:"Core lockup beside a motion strip showing the live element in five states — the presentation itself demonstrates the system",color_approach:"Neutral structural color for the stable letters, signature accent reserved exclusively for the live element",typography:"Sturdy neo-grotesque base; the live character carries all expression so the rest can carry all clarity",imagery:"Screen-first mockups: animated avatar, story sticker, loading state — digital surfaces where motion is native"},
+key_elements:["The stable wordmark foundation shown alone first","Five defined states of the live element with usage rules for each","Animated avatar mockup demonstrating the loop","Campaign example where the live element goes maximum-expression"],
+presentation_strategy:"Show the boring version first, then animate — the moment the static mark moves is the moment the client understands they're buying a system, not a sticker.",
+client_angle:"Every post, launch, and season gets brand-correct novelty for free — the identity generates content instead of just labeling it.",
+what_makes_it_work:"Constraint makes the motion meaningful: because only one element ever changes, every change reads as intentional brand behavior rather than inconsistency.",
+production_notes:["Deliver a Lottie/GIF/MP4 export trio of the core animation for every platform's requirements","Document the five states as the complete legal set — improvised sixth states are how systems die","Static fallback must be the strongest single state, specified explicitly"]})],
+flyer:[
+()=>({mockup_title:"The One-Glance Poster",design_concept:`A flyer for ${_mc()} engineered around the three-second hallway test: event name, date, and reason-to-care readable from six feet away, everything else discoverable at arm's length.`,
+visual_direction:{layout:"Vertical thirds — massive headline zone, central visual anchor, dense info footer; nothing important within 5% of any edge",color_approach:"One saturated background field with high-contrast type — flat color outperforms imagery for distance legibility",typography:"Condensed heavy display at maximum size for the headline; clean sans information block set in a strict two-column footer",imagery:"A single bold graphic element or silhouette — one image doing one job, not a collage doing none"},
+key_elements:["Headline sized for across-the-room reading — minimum one-third of layout height","Date/time/location block in scannable fixed format","QR code with a human-readable short link beside it","One repeatable graphic motif that survives into social adaptations"],
+presentation_strategy:"Mock it up pinned to a crowded notice board among real clutter — winning the cluttered-wall context is the entire job description of a flyer.",
+client_angle:"This design is built for where flyers actually live: busy walls, quick glances, walking pace — not for a clean presentation slide.",
+what_makes_it_work:"Most flyers are brochures pretending to be posters; this one accepts that flyers get three seconds and spends all three on the decision to care.",
+production_notes:["Print-spec with 3mm bleed and CMYK conversion checked — saturated screen colors shift most","Test the QR code printed at final size from a real phone before the print run","Export a same-design Instagram story crop in the same session — one design, two channels"]}),
+()=>({mockup_title:"The Editorial Invite",design_concept:`A premium flyer treating ${_mc()} like a gallery opening — refined, type-led, and intentionally quiet in a loud format, signaling that the event is for people who notice details.`,
+visual_direction:{layout:"Generous margins, asymmetric type composition, information set in an elegant ladder down the right edge",color_approach:"Cream or bone field, ink-dark type, one restrained accent line — the restraint IS the loudness in context",typography:"High-contrast serif display mixed with small tracked-caps labels — invitation language, not announcement language",imagery:"Either no imagery or one small, perfectly placed photographic element treated like a stamp"},
+key_elements:["A headline set like a book title — elegant break points chosen, not wrapped","Tracked-caps detail lines (date · time · place) as typographic jewelry","Thin accent rule or border lending invitation formality","Paper-stock callout — uncoated texture as part of the design"],
+presentation_strategy:"Present beside a loud conventional flyer for the same event — the contrast makes the strategy self-explanatory in one slide.",
+client_angle:"In a wall of shouting flyers, the whisper gets the second look — and the second look is where attendance decisions actually happen.",
+what_makes_it_work:"Scarcity signaling: minimal design implies the event doesn't need to beg, which makes attendance feel like access rather than response.",
+production_notes:["Specify uncoated stock — this concept loses half its effect on gloss","Letterpress or emboss option quoted for a premium tier print run","Set up the type with real small-caps, not scaled capitals"]}),
+()=>({mockup_title:"The Hype Sheet",design_concept:`A maximum-energy flyer for ${_mc()} built like a streetwear drop announcement — dense, layered, and designed to be photographed and reposted as much as read.`,
+visual_direction:{layout:"Controlled chaos on a strict underlying grid — overlapping type blocks, rotated elements, a starburst or sticker cluster anchoring one corner",color_approach:"Two clashing-on-purpose brand colors plus black — vibration that reads as energy at a glance",typography:"Mixed-weight stacking: ultra-bold condensed headlines, mono detail text, one outlined display word for texture",imagery:"Halftone-treated photo or repeated motif pattern as a background energy layer beneath the type"},
+key_elements:["A 'sticker' element (price, date, or 'free entry') rotated off-grid for eye-snag","Repeated edge text strip running vertically — the streetwear frame move","Bold central lockup that survives being photographed at an angle","Social handle treated as a design element, not a footnote"],
+presentation_strategy:"Mock it up as a phone photo posted to a story with a hand partially in frame — this flyer's distribution strategy is people sharing pictures of it.",
+client_angle:"Every flyer that gets photographed is free advertising with built-in social proof — this one is designed to be camera-bait first, document second.",
+what_makes_it_work:"The grid underneath the chaos: every rotated, layered element snaps to invisible structure, so the energy reads as confidence instead of mess.",
+production_notes:["Keep critical info inside the central safe zone — edge elements will crop in photos and reposts","Print a short run on sticker stock — the design doubles as merch","Build the layered file with groups intact for fast date-change reprints"]})],
+social:[
+()=>({mockup_title:"The Scroll-Stopper Card",design_concept:`A feed post for ${_mc()} built on the billboard principle: one oversized claim, one visual anchor, readable in the half-second between thumb flicks.`,
+visual_direction:{layout:"Type-dominant square — headline filling 60% of the frame, breathing space around it, small attribution lockup bottom-left",color_approach:"Solid brand-color field with maximum-contrast type — flat color cards consistently out-stop photographic posts in busy feeds",typography:"Heavy display face at poster scale with one highlighted word in the accent color — the highlight directs the half-second of attention",imagery:"None, or one small icon — this format's power is refusing to compete with photo posts on photo terms"},
+key_elements:["A seven-words-or-fewer headline with one accent-colored power word","Consistent corner-anchored brand mark for grid recognition","A 'save this' visual cue or numbered-series badge","Bottom caption-bait line that finishes in the post caption"],
+presentation_strategy:"Present inside a simulated feed between two real competing posts — out-of-context approval means nothing; in-feed performance is the brief.",
+client_angle:"This template turns every strong sentence you write into branded visual content in two minutes — sustainable consistency, not one-off heroics.",
+what_makes_it_work:"The accent-word highlight does the algorithm's job manually: it tells a moving eye exactly where to land, and a landed eye becomes a stopped thumb.",
+production_notes:["Build at 1080×1350 portrait — taller posts earn more screen real estate than squares","Keep all text inside the center-safe zone for feed-crop survival","Deliver as an editable template with locked brand elements and one editable text layer"]}),
+()=>({mockup_title:"The Carousel Curriculum",design_concept:`A multi-slide teaching post for ${_mc()} structured like a mini-course — hook slide, value slides, recap, CTA — engineered for the save button, the algorithm's favorite signal.`,
+visual_direction:{layout:"Consistent frame system: persistent header bar, numbered progress dots, content zone, swipe-cue arrow bleeding off the right edge",color_approach:"Light neutral background for reading comfort across slides, brand color reserved for the frame system and key callouts",typography:"Clear hierarchy locked across slides — one size for points, one for support text; consistency is what makes 8 slides feel like one object",imagery:"Simple diagrams and icon illustrations over photos — carousels teach, and teaching visuals should be drawn, not shot"},
+key_elements:["Hook slide with a curiosity gap that makes not-swiping feel like a loss","Swipe-cue element bleeding off-edge on every non-final slide","Recap slide compressing everything into one saveable screenshot","Final slide with a single CTA and zero competing elements"],
+presentation_strategy:"Walk the client through it as a swipe experience on an actual phone — carousels are judged by thumb feel, not by ten slides laid flat on a screen.",
+client_angle:"Saves and shares are the metrics that compound, and educational carousels are the most reliably saved format in existence — this is reach infrastructure, not a post.",
+what_makes_it_work:"The recap slide is the secret: people save what they'll want later, and a one-screenshot summary is the most save-worthy object a brand can produce.",
+production_notes:["Export at 1080×1350 with identical safe margins on every slide","Cap line count per slide — a crowded slide kills the swipe momentum that carried the reader there","Template the frame system so slide count flexes from 5 to 10 without redesign"]}),
+()=>({mockup_title:"The Proof Drop",design_concept:`A results-forward post for ${_mc()} built around evidence — a number, a before/after, a testimonial — staged with enough production value that the proof feels premium, not braggy.`,
+visual_direction:{layout:"The proof element isolated center-frame like a product shot, context strip above, attribution and CTA strip below",color_approach:"Dark premium field making the proof element glow — results presented like jewelry, lit and isolated",typography:"The number or key quote at hero scale in display type; everything contextual in quiet small caps",imagery:"Screenshot-style framing for receipts (with realistic UI chrome) or split-frame for before/after — formats audiences already trust"},
+key_elements:["One hero proof element — a single number, quote, or comparison, never a cluster","Authenticity texture: screenshot chrome, timestamp, or platform UI hints","Quiet brand attribution — confident proof doesn't need a loud logo","A bridge line connecting their result to the viewer's possibility"],
+presentation_strategy:"Present three proof posts as a series concept — one result is an anecdote, a recurring proof format is a reputation machine.",
+client_angle:"Audiences are trained to scroll past claims and stop at receipts — this format converts your existing wins into your highest-trust content category.",
+what_makes_it_work:"Isolation equals importance: staging one number like a luxury product photograph makes the result feel rare, and rare results attract buyers.",
+production_notes:["Get written permission for any client results or names before publishing","Keep real screenshots unedited inside their frame — cropping is fine, altering is never","Build light and dark variants; proof posts get reshared into unpredictable contexts"]})],
+brand_kit:[
+()=>({mockup_title:"The Pocket Brand System",design_concept:`A complete starter brand kit for ${_mb()} compressed onto surfaces a founder actually uses daily — one-page brand sheet, profile set, and three templates that make consistency automatic.`,
+visual_direction:{layout:"Presented as a kit flat-lay: brand sheet centered, surrounded by its applications like a product unboxing",color_approach:"Full palette displayed as labeled chips with hex codes visible — the kit teaches while it shows",typography:"Type specimens shown in real use (a heading, a paragraph, a label) rather than alphabet charts nobody reads",imagery:"Mockup contexts matching the founder's actual channels — phone screens and social frames over corporate stationery"},
+key_elements:["One-page brand sheet: logo rules, palette, type, and voice keywords on a single reference","Profile asset set: avatar, banner, and highlight covers, platform-sized","Three editable post templates covering announcement, quote, and promo","A do/don't strip — four visual examples preventing the most common drift"],
+presentation_strategy:"Demonstrate the kit by creating a new on-brand post live in under two minutes — the speed IS the product.",
+client_angle:"This kit replaces the designer-on-call: every future post, story, and banner has an answer already decided, which is what consistency actually costs.",
+what_makes_it_work:"Compression forces clarity — a brand that fits on one page gets used; a 40-page guideline PDF gets admired once and forgotten.",
+production_notes:["Deliver templates in a phone-editable tool format, not desktop-only files","Export the brand sheet as both PDF and a phone-wallpaper-sized image for true pocket reference","Name files by use ('post-announcement-template') not by design jargon"]}),
+()=>({mockup_title:"The Scale-Ready System",design_concept:`An expansion-grade brand kit for ${_mb()} built for the moment the brand stops being one person — rules explicit enough that a contractor, VA, or future hire produces on-brand work on day one.`,
+visual_direction:{layout:"Guideline-spread presentation: paired pages showing rule and example side by side throughout",color_approach:"Palette with usage percentages and pairing rules — not just which colors, but how much and with what",typography:"Full hierarchy specification: exact sizes, weights, and spacing for six recurring content types",imagery:"A defined photo treatment recipe (crop, tone, subject rules) so any source image can be made on-brand"},
+key_elements:["Logo usage matrix: every variant mapped to its approved contexts","Color proportion guide — the 60/30/10 rule made brand-specific","Voice and tone page with rewrite examples (off-brand line → on-brand line)","Asset library structure: a folder system as part of the deliverable"],
+presentation_strategy:"Frame the presentation around delegation: 'here is what you can now hand off' — the kit's value is measured in founder hours recovered.",
+client_angle:"The brand currently lives in your head, which means you're the bottleneck — this kit moves it onto paper so growth stops requiring your eyes on everything.",
+what_makes_it_work:"Rules with examples beat rules alone: every guideline page pairs the principle with a real before/after, so judgment transfers instead of just instructions.",
+production_notes:["Build the asset library folder structure and deliver it populated, not as a diagram","Include source files with layers organized and named — a kit a designer can't extend is a dead end","Version the kit (v1.0) and date it; brands evolve and the kit should expect to"]}),
+()=>({mockup_title:"The Launch-Week Arsenal",design_concept:`A campaign-focused brand kit for ${_mb()} covering one critical week — every asset a launch needs, designed as one visual family so seven days of posting reads as one event.`,
+visual_direction:{layout:"Timeline presentation: assets arranged across a launch-week calendar showing what deploys when",color_approach:"Core brand palette plus one limited-edition launch accent — special-moment color that retires after the campaign",typography:"Brand type system with one display treatment exclusive to launch headlines — recognizable urgency",imagery:"A signature launch motif (shape, texture, or graphic device) appearing on every asset as the campaign thread"},
+key_elements:["Teaser, announcement, and last-call post set — the three-beat launch rhythm","Story countdown sequence with interactive sticker placements mapped","Email header and landing-page hero matched to the social system","Day-of celebration and post-launch thank-you assets — the beats everyone forgets to design"],
+presentation_strategy:"Present as the week itself: walk day by day through the calendar so the client sees a campaign, not a pile of graphics.",
+client_angle:"Launches fail in the gaps — the unplanned day-four post, the missing last-call graphic. This kit means launch week runs on schedule, not on scramble.",
+what_makes_it_work:"The retiring launch accent creates urgency at the visual level: when the special color disappears, the moment is visibly over — scarcity built into the design system.",
+production_notes:["Deliver assets pre-named by deploy day (day1-teaser, day3-announce) for zero-thought posting","Keep all date text on editable layers — launch dates move; designs shouldn't break","Include a one-page posting schedule as part of the kit itself"]})],
+website:[
+()=>({mockup_title:"The Conversion Hero",design_concept:`An above-the-fold section for ${_mc()} that answers the three instant questions — what is this, is it for me, what do I do — before a single scroll, with everything else demoted to support.`,
+visual_direction:{layout:"Asymmetric split: headline and CTA stack owning the left 55%, supporting visual right — text leads because text converts",color_approach:"Calm neutral field with the CTA in the page's single highest-contrast color — one button visibly outranking everything",typography:"Benefit-driven headline in confident display type, one supporting line, no third paragraph — fold space is too expensive for throat-clearing",imagery:"Product-in-context or outcome imagery — show the after-state, not an abstract decoration"},
+key_elements:["A headline stating the outcome, not the category ('Get X' beats 'Welcome to Y')","Primary CTA with action-specific label — never 'Submit', never 'Learn More'","One trust signal within the fold: number, logo strip, or star rating","A scroll cue that promises proof below, not just more content"],
+presentation_strategy:"Present at real device sizes with a five-second test: show the mockup briefly, ask what the company does and where you'd click — if both answers come instantly, ship it.",
+client_angle:"Most visitors only ever see this section — making it carry the whole pitch isn't pessimism, it's math, and this design does that math deliberately.",
+what_makes_it_work:"Single-CTA discipline: every additional equally-weighted button divides intent, and divided intent leaves through the back button.",
+production_notes:["Design mobile-first — the desktop hero is the adaptation, not the original","Keep the hero image under 200KB; a beautiful section that loads slowly converts worse than a plain one that loads instantly","A/B-ready: build the headline as easily swappable so testing is a content change, not a dev ticket"]}),
+()=>({mockup_title:"The Proof Corridor",design_concept:`A mid-page social-proof section for ${_mc()} structured as an evidence sequence — numbers, then faces, then words — walking skeptics from claim to belief in one scroll.`,
+visual_direction:{layout:"Three stacked bands: stat trio, testimonial cards with photos, and a featured case highlight — escalating intimacy of proof",color_approach:"Subtle background shift from the surrounding page — proof gets its own atmosphere without shouting",typography:"Numbers at display scale (the skim layer), quotes in comfortable reading sizes (the consideration layer)",imagery:"Real faces with real names — stock-photo testimonials are worse than no testimonials, and visitors can always tell"},
+key_elements:["Stat trio with specific numbers — 1,247 reads truer than 1,000+","Testimonial cards: photo, name, context, and one specific result each","A featured mini-case with before/after framing","Source honesty — platform logos or links where reviews actually live"],
+presentation_strategy:"Present the section against the skeptic persona: walk through it as the visitor who's been burned before — this section exists for them, not for fans.",
+client_angle:"Visitors don't leave because they don't understand the offer — they leave because they don't yet believe it; this section is where belief gets built.",
+what_makes_it_work:"Specificity is the trust currency throughout: exact numbers, named people, particular results — every vague element would subtract, so none survived.",
+production_notes:["Collect written permission for every name, face, and result shown","Lazy-load images below the first band to protect page speed","Build the testimonial cards as a repeatable component — proof should grow without redesign"]}),
+()=>({mockup_title:"The Decision Closer",design_concept:`A pre-footer section for ${_mc()} engineered for the bottom-of-page moment — the visitor who scrolled everything is the most interested person on the site, and this section converts that interest before it cools.`,
+visual_direction:{layout:"Full-width statement band: headline, micro-reassurance line, and CTA on a bold brand-color field — a visual finale, not a fade-out",color_approach:"The strongest brand color as the full background — the page's energy peak deliberately placed at the decision moment",typography:"A closing headline with urgency or identity framing at near-hero scale; reassurance line small and calm beneath",imagery:"None — this section is a clean runway; anything decorative here competes with the click"},
+key_elements:["A closing headline reframing action as identity ('Ready to build yours?')","Risk-reducing micro-copy under the CTA: guarantee, timeline, or 'no card required'","The same CTA label as the hero — repetition builds decision comfort","An alternative low-commitment link for the not-yet-ready (small, secondary, present)"],
+presentation_strategy:"Present hero and closer side by side as the page's bookends — clients instantly understand the page as a journey with a beginning and a destination.",
+client_angle:"The scroll-to-bottom visitor already sold themselves — this section's job is simply not fumbling the moment, and most pages fumble it with a generic footer.",
+what_makes_it_work:"Position psychology: a bold ask at the page's end lands as a natural conclusion, the same ask mid-page reads as pushy — placement does the persuading.",
+production_notes:["Keep the secondary option visually subordinate — present but never competing","Test band contrast for accessibility; bold color fields fail contrast checks more than designers expect","Mirror any hero A/B headline tests here so the bookends stay matched"]})],
+product:[
+()=>({mockup_title:"The Shelf Winner",design_concept:`Primary packaging for ${_mc()} designed for the two-second shelf decision — category instantly clear, brand unmistakable, and one differentiator readable at arm's length.`,
+visual_direction:{layout:"Front panel in strict hierarchy: brand mark top third, product identity center, differentiator claim banner beneath — the eye's natural descent",color_approach:"One ownable dominant color claiming shelf territory — chosen specifically against the category's existing wall of competitors",typography:"Product name in confident display type readable at one meter; supporting text disciplined to genuinely supporting sizes",imagery:"Single hero element — ingredient, result, or icon — never a collage; shelf glances can process exactly one image"},
+key_elements:["The dominant brand-color field as the recognition anchor","A differentiator banner with one claim, specifically worded ('30-second setup' beats 'easy to use')","Consistent top-panel branding for shelf-stack visibility","A tactile or finish moment (spot gloss, emboss) rewarding pickup"],
+presentation_strategy:"Present on a simulated shelf between two real competitor packages — approval in isolation is meaningless; this design is built for the lineup.",
+client_angle:"The package is the only ad every single customer sees — this design treats that front panel as the highest-value media placement the brand owns.",
+what_makes_it_work:"Color-blocking against the category: when every competitor whispers in the same palette, owning one different color is the cheapest dominant move available.",
+production_notes:["Proof the dominant color physically before the run — shelf color is a brand asset and drift is expensive","Keep dieline text clear of fold lines with 3mm safety","Design the top panel as carefully as the front — stacked and shelved products often show it first"]}),
+()=>({mockup_title:"The Unboxing Theater",design_concept:`A packaging experience for ${_mc()} choreographed in three acts — exterior restraint, opening reveal, interior message — built for the camera as much as the customer.`,
+visual_direction:{layout:"Minimal exterior with centered mark; maximal interior: pattern-printed inside walls and a staged first-glimpse arrangement",color_approach:"Quiet outside, saturated inside — the contrast IS the reveal, engineered for the lid-off moment",typography:"Exterior limited to the wordmark; interior carries a warm message in conversational type — the brand speaks once you're inside",imagery:"Interior pattern built from brand motifs; a printed insert card styled as a note, not a manual"},
+key_elements:["The exterior/interior contrast moment — restraint then celebration","An insert card with a message worth photographing","Product presentation layer: tissue, sticker seal, or fitted tray staging the first view","A subtle share prompt with the brand hashtag, placed where phones already are"],
+presentation_strategy:"Present as a filmed opening sequence, not flat renders — the deliverable is a moment in time, and the client should feel it the way a customer will.",
+client_angle:"Unboxing content is advertising customers make for free — this package is designed to earn that content on purpose instead of hoping for it.",
+what_makes_it_work:"Sequenced contrast creates emotion: plain-to-vivid in one motion produces a tiny dopamine hit, and that feeling transfers directly onto the product inside.",
+production_notes:["Interior printing costs more — quote both full-interior and insert-only versions for budget tiers","Test the opening motion physically; a reveal that fights the customer kills the theater","Keep the seal sticker easy to break cleanly — frustration is the anti-unboxing"]}),
+()=>({mockup_title:"The Label System",design_concept:`A variant-ready label architecture for ${_mc()} — one locked master structure with a single switching element per flavor/version, so the line grows without ever redesigning.`,
+visual_direction:{layout:"Fixed grid: brand zone, product zone, and a designated variant zone (color band + name) that changes while everything else holds",color_approach:"Neutral constant base with a variant color-coding system — the family reads as one brand, each member reads instantly distinct",typography:"All type styles locked across variants; only the variant name text changes — discipline is the design",imagery:"A consistent illustration or icon style with one swappable motif per variant — same artist's hand, different subject"},
+key_elements:["The locked master grid every future SKU inherits","Variant color band system with five colorways pre-assigned","Lineup view: three variants side by side proving family coherence","A regulatory/info zone pre-sized so legal text never breaks the layout later"],
+presentation_strategy:"Present the lineup before any single label — the client is buying the system's logic, and the row of three is the proof the logic works.",
+client_angle:"Every future product launch becomes a one-day design task instead of a project — this system is infrastructure priced as packaging.",
+what_makes_it_work:"The constant-versus-variable split: customers learn the constant once and then navigate by the variable forever — recognition and findability from the same structure.",
+production_notes:["Document the variant rules (what changes, what never does) as a one-page spec with the files","Pre-assign the next five variant colors even if unbuilt — future-proofing costs nothing now","Confirm label material and adhesive against the product's real storage conditions"]})],
+marketing:[
+()=>({mockup_title:"The Offer Spotlight",design_concept:`A promotional asset for ${_mc()} structured on the classic offer stack — what, why now, what it costs, what you risk by waiting — compressed into one frame with zero ambiguity.`,
+visual_direction:{layout:"Center-stage offer with price treatment as a designed element; urgency strip across the top, CTA dominating the bottom third",color_approach:"Brand base with a dedicated 'deal' accent used nowhere else in the brand system — promotional color that means promotion",typography:"Price at display scale with the anchor (old price, value comparison) visibly struck beside it — the math shown, not described",imagery:"Product or outcome shot angled toward the CTA — even the imagery points at the action"},
+key_elements:["Price treatment with visible anchor comparison doing the value math","A real deadline or unit count — specific urgency, never vague 'limited time'","Single CTA with action language ('Claim yours' beats 'Shop now')","One trust element near the price: guarantee, rating, or sold-count"],
+presentation_strategy:"Pitch the structure before the style: walk the client through the persuasion sequence the eye travels, then show how the design enforces it.",
+client_angle:"Discounts without structure just train customers to wait for discounts — this asset frames the offer so the urgency and value logic do the selling, protecting full price the rest of the year.",
+what_makes_it_work:"The dedicated deal color: because it appears only during promotions, the audience learns the visual signal — recognition that compounds with every campaign.",
+production_notes:["Keep deadline text on an editable layer — offers extend and assets shouldn't rebuild","Export the full size set in one session: feed, story, email header","Archive each promo's final numbers with the asset for future offer benchmarking"]}),
+()=>({mockup_title:"The Authority Builder",design_concept:`A non-promotional marketing asset for ${_mc()} — a stat card, insight graphic, or industry take designed to be shared by people who'd never share an ad, building reach the offer posts later harvest.`,
+visual_direction:{layout:"Editorial composition: the insight as the hero, brand presence as a quiet signature — generosity-first, attribution-second",color_approach:"Refined neutral palette with brand accent confined to the data highlight and signature — credibility's color scheme",typography:"The key stat or claim at headline scale, methodology or context line in small print — confidence with receipts",imagery:"Clean data visualization or a single conceptual graphic — the aesthetic of research, not retail"},
+key_elements:["One genuinely useful insight the audience would share without being asked","A simple, honest data visualization — clarity over decoration","Quiet brand signature placed where shares preserve it","A context/source line — small print that does heavy credibility lifting"],
+presentation_strategy:"Frame it inside the content mix: show the calendar where authority posts outnumber offer posts three to one, and this asset's role inside that ratio.",
+client_angle:"Audiences share what makes THEM look smart — this asset makes sharers look informed while quietly carrying your brand into rooms ads can't enter.",
+what_makes_it_work:"The generosity asymmetry: giving real insight with minimal branding builds more brand than maximal branding ever does — trust compounds, interruption doesn't.",
+production_notes:["Verify any cited figures and keep the source noted in the file itself","Position the signature inside the graphic's crop-safe zone — screenshots are the main distribution","Build as a repeatable series template; authority is a frequency game"]}),
+()=>({mockup_title:"The Retarget Reminder",design_concept:`A follow-up asset for ${_mc()} aimed at the warm audience that looked and left — familiar visual language with a new angle, because the second impression sells what the first introduced.`,
+visual_direction:{layout:"Recognizably related to the original campaign but visibly evolved — same family, new outfit; familiarity plus novelty in one frame",color_approach:"Original campaign palette with one element inverted or shifted — enough sameness to trigger memory, enough difference to defeat banner blindness",typography:"A headline addressing the return visit directly ('Still thinking it over?') — acknowledging the relationship that already exists",imagery:"The product from a new angle, or the detail shot the first asset didn't show"},
+key_elements:["A memory-trigger element carried from the original campaign","New-information offer: the answer to the most common hesitation","Softened CTA matching warm-audience psychology ('Take another look')","A micro-guarantee or friction-remover near the action"],
+presentation_strategy:"Present as a pair with the original asset — the relationship between first touch and follow-up IS the strategy, and seeing both makes it click.",
+client_angle:"Most sales happen after the first look, but most brands only design for the first look — this asset works the part of the funnel where the actual money is.",
+what_makes_it_work:"Acknowledged familiarity disarms: speaking to the viewer as a returner ('still here?') converts the awkwardness of being followed into the warmth of being remembered.",
+production_notes:["Build two or three variations to rotate — warm audiences see assets repeatedly and fatigue fast","Address a different objection in each variation; rotation should add information, not just change colors","Match landing destination to the asset's promise — retargeting dies on generic landing pages"]})],
+client:[
+()=>({mockup_title:"The Vision Reveal",design_concept:`A client presentation concept for ${_mc()} staged as a narrative reveal — context, problem, then the work shown in real situations — so the client experiences the design as their customers will before they're asked to judge it.`,
+visual_direction:{layout:"Cinematic presentation frames: full-bleed contextual mockups with minimal annotation — the work performing, not posing",color_approach:"Neutral presentation chrome (dark slate or warm grey) keeping every drop of color attention on the work itself",typography:"Quiet presentation labels in small caps; the designed work provides all the typographic drama",imagery:"The concept embedded in the client's actual world — their storefront, their feed, their customer's hands"},
+key_elements:["A context slide framing the goal before any design appears","Hero reveal in the most impressive real-world placement available","Supporting application spread proving the idea travels","A 'why this works' slide connecting each major choice to the brief's goals"],
+presentation_strategy:"Never open on the design — open on the problem, build the logic, then reveal; a client who follows the reasoning approves the conclusion.",
+client_angle:"Presented this way, stakeholders evaluate strategy instead of debating taste — the conversation becomes 'does this achieve the goal' rather than 'do I like blue.'",
+what_makes_it_work:"Context preempts the imagination gap: clients can't always picture a logo on a sign, but they can't argue with a photo of it already there.",
+production_notes:["Use the client's real locations and channels in mockups — recognition multiplies buy-in","Prepare one deliberate alternate direction; choice satisfies the need to decide without opening infinite revisions","Annotate sparingly — every label on the work is a place attention leaks"]}),
+()=>({mockup_title:"The Three Doors",design_concept:`A concept-options presentation for ${_mc()} offering exactly three named directions — safe, balanced, bold — each fully realized, so the client chooses a strategy rather than critiquing fragments.`,
+visual_direction:{layout:"Parallel structure: each direction gets identical slide treatment (name, big idea, hero mockup, applications) — fairness in format keeps the choice about substance",color_approach:"Each direction in its own palette, presented on identical neutral chrome — the directions differ, the staging never does",typography:"Direction names as memorable titles ('The Heritage Route', 'The Signal') — named ideas get discussed; numbered options get forgotten",imagery:"One matching hero mockup context across all three — same surface, three futures, instant comparison"},
+key_elements:["Three named, fully-realized directions — never two-and-a-filler","A one-line strategic bet stated for each ('This direction bets that your audience wants…')","Identical application proof for each route","A comparison closer: all three side by side with their bets restated"],
+presentation_strategy:"Present each direction with full conviction as if it were the only one — clients smell a designer's favorite, and a stacked deck poisons the choice.",
+client_angle:"This format replaces 'do you like it?' with 'which bet do we make?' — a decision frame that produces commitment instead of committee feedback.",
+what_makes_it_work:"Three is the trust number: two feels like a trap, four dilutes conviction — three fully-built routes signals both range and rigor in a single meeting.",
+production_notes:["Build all three to equal finish — an obviously rushed option insults the format","Document the chosen direction's bet in the follow-up email; it becomes the north star for every future revision debate","Archive the unchosen routes; they're tomorrow's sub-brand or campaign starting points"]}),
+()=>({mockup_title:"The Before/After Verdict",design_concept:`A transformation-framed presentation for ${_mc()} placing current state and proposed work side by side at every step — the format that makes improvement undeniable and approval feel inevitable.`,
+visual_direction:{layout:"Strict split-frame discipline: current state left, proposed right, identical scale and context — the comparison does the arguing",color_approach:"Current state shown desaturated or in grey chrome, proposal in full color — a subtle thumb on the scale that still plays fair",typography:"Minimal annotation between panels: one line naming what changed and why it matters",imagery:"Same context both sides — same mockup surface, same crop — so the only variable is the work"},
+key_elements:["Side-by-side hero comparison in the most dramatic context available","Three focused detail comparisons (type, color, hierarchy) for the analytical stakeholders","A metrics-expectation slide: what this change should improve and how it'll be measured","The closing single-image 'after' — ending on the future, alone"],
+presentation_strategy:"Let silence work: show each comparison for a beat before speaking — when the improvement is visible, the first voice in the room should be the client's.",
+client_angle:"Stakeholders who can see exactly what changed and why can defend the decision upward — this format arms your internal champion with their own presentation.",
+what_makes_it_work:"Contrast is comprehension: humans evaluate by comparison, and giving the eye both states simultaneously converts subjective taste into observable improvement.",
+production_notes:["Recreate the 'before' faithfully — a strawman current state discredits the whole comparison","Keep both panels at identical scale and crop; any staging asymmetry will be noticed and held against you","Provide the after-only versions as well for the client's own internal sharing"]})]
+};
+
 
 // Clear all inputs + results for the active tool
 function clearCurrentTool(){
@@ -645,7 +1366,7 @@ async function run(tool){
 }
 
 async function doPalette(){
-  const d=pr(await api(`Mood:"${v('p-mood')}". Industry:"${v('p-ind')||'any'}". Avoid:"${v('p-av')||'none'}".`,`Elite brand colorist. Bold, specific, no safe defaults.\nReturn ONLY valid JSON:\n{"title":"2-4 words","palette":[{"name":"string","hex":"#xxxxxx","role":"Primary|Secondary|Accent|Neutral|Base","emotion":"3-5 words","usage":"string"}],"story":"2 sentences creative director rationale"}`));
+  const d=await gen('palette',`Mood:"${v('p-mood')}". Industry:"${v('p-ind')||'any'}". Avoid:"${v('p-av')||'none'}".`,`Elite brand colorist. Bold, specific, no safe defaults.\nReturn ONLY valid JSON:\n{"title":"2-4 words","palette":[{"name":"string","hex":"#xxxxxx","role":"Primary|Secondary|Accent|Neutral|Base","emotion":"3-5 words","usage":"string"}],"story":"2 sentences creative director rationale"}`);
   const sw=d.palette.map(c=>{const lt=lm(c.hex)>0.45,tc=lt?'rgba(0,0,0,0.65)':'rgba(255,255,255,0.8)';return`<div class="sw" style="background:${c.hex}" onclick="cp('${c.hex}')" title="Click to copy"><div><div class="sw-hex" style="color:${tc}">${c.hex}</div><div class="sw-role" style="color:${tc}">${c.role.toUpperCase()}</div></div></div>`;}).join('');
   const grad=d.palette.map(c=>c.hex).join(',');
   const usage=d.palette.map(c=>`<div class="rli"><div style="width:9px;height:9px;border-radius:50%;background:${c.hex};flex-shrink:0;margin-top:4px"></div><div class="rlt"><strong style="color:var(--muted2)">${c.name}</strong> — ${c.usage}</div></div>`).join('');
@@ -654,7 +1375,7 @@ async function doPalette(){
 
 let FP=[],FAI=0;
 async function doFonts(){
-  const d=pr(await api(`Brand:"${v('f-brand')}". Never feel like:"${v('f-av')||'generic'}".`,`World-class typographer. 3 genuinely distinct pairings.\nReturn ONLY valid JSON:\n{"pairings":[{"display":"Google Font name","body":"Google Font name","tag":"2-3 words","why_display":"1 sentence","why_body":"1 sentence","tension":"1 sentence","use_case":"string"}]}`));
+  const d=await gen('fonts',`Brand:"${v('f-brand')}". Never feel like:"${v('f-av')||'generic'}".`,`World-class typographer. 3 genuinely distinct pairings.\nReturn ONLY valid JSON:\n{"pairings":[{"display":"Google Font name","body":"Google Font name","tag":"2-3 words","why_display":"1 sentence","why_body":"1 sentence","tension":"1 sentence","use_case":"string"}]}`);
   FP=d.pairings;renderFP(0);
 }
 function renderFP(i){
@@ -666,14 +1387,14 @@ function renderFP(i){
 }
 
 async function doBrief(){
-  const d=pr(await api(`Project:"${v('b-proj')}". Client:"${v('b-client')||'unspecified'}". Context:"${v('b-ctx')||'none'}".`,`Senior creative director. Real direction, not vague language.\nReturn ONLY valid JSON:\n{"overview":"string","objectives":["string","string","string"],"audience":"string","tone":"string","deliverables":["string","string","string","string"],"constraints":"string","inspiration":"string","success":"string","timeline":"string"}`));
+  const d=await gen('brief',`Project:"${v('b-proj')}". Client:"${v('b-client')||'unspecified'}". Context:"${v('b-ctx')||'none'}".`,`Senior creative director. Real direction, not vague language.\nReturn ONLY valid JSON:\n{"overview":"string","objectives":["string","string","string"],"audience":"string","tone":"string","deliverables":["string","string","string","string"],"constraints":"string","inspiration":"string","success":"string","timeline":"string"}`);
   const objs=d.objectives.map((o,i)=>`<div class="rli"><span class="rln">0${i+1}</span><span class="rlt">${o}</span></div>`).join('');
   const dels=d.deliverables.map(dl=>`<div class="rli"><span class="rln">→</span><span class="rlt">${dl}</span></div>`).join('');
   sr('brief',`<div class="result"><div class="rh"><span class="rh-label">BRIEF GENERATED</span></div><div class="rb"><span class="rl">PROJECT OVERVIEW</span><p class="rtx" style="margin-bottom:18px">${d.overview}</p><div class="rgrid"><div class="ri"><label>OBJECTIVES</label><div class="rlist">${objs}</div></div><div class="ri"><label>DELIVERABLES</label><div class="rlist">${dels}</div></div></div><div class="rgrid" style="margin-top:12px"><div class="ri"><label>TARGET AUDIENCE</label><p>${d.audience}</p></div><div class="ri"><label>TONE & VOICE</label><p>${d.tone}</p></div><div class="ri"><label>CONSTRAINTS</label><p>${d.constraints}</p></div><div class="ri"><label>INSPIRATION DIRECTION</label><p>${d.inspiration}</p></div><div class="ri"><label>SUCCESS LOOKS LIKE</label><p>${d.success}</p></div><div class="ri"><label>TIMELINE</label><p>${d.timeline}</p></div></div></div></div>`);
 }
 
 async function doCritique(){
-  const d=pr(await api(`Design:"${v('c-design')}". Context:"${v('c-ctx')||'unspecified'}".`,`Legendary creative director. Honest. Specific. Never vague.\nReturn ONLY valid JSON:\n{"score":85,"verdict":"string","strengths":[{"point":"string","why":"string"},{"point":"string","why":"string"},{"point":"string","why":"string"}],"problems":[{"issue":"string","why":"string","fix":"string"},{"issue":"string","why":"string","fix":"string"},{"issue":"string","why":"string","fix":"string"}],"quick_wins":["string","string","string"],"iconic":"string"}`));
+  const d=await gen('critique',`Design:"${v('c-design')}". Context:"${v('c-ctx')||'unspecified'}".`,`Legendary creative director. Honest. Specific. Never vague.\nReturn ONLY valid JSON:\n{"score":85,"verdict":"string","strengths":[{"point":"string","why":"string"},{"point":"string","why":"string"},{"point":"string","why":"string"}],"problems":[{"issue":"string","why":"string","fix":"string"},{"issue":"string","why":"string","fix":"string"},{"issue":"string","why":"string","fix":"string"}],"quick_wins":["string","string","string"],"iconic":"string"}`);
   const sc=d.score>=80?'var(--green)':d.score>=60?'var(--blue)':'#f87171';
   const str=d.strengths.map(s=>`<div class="str-r"><span class="str-i">✓</span><div><div class="str-p">${s.point}</div><div class="str-w">${s.why}</div></div></div>`).join('');
   const prb=d.problems.map(p=>`<div class="pcard"><div class="pissue">${p.issue}</div><div class="pwhy">${p.why}</div><div class="fix-r"><span class="fix-l">FIX →</span><span class="fix-t">${p.fix}</span></div></div>`).join('');
@@ -682,7 +1403,7 @@ async function doCritique(){
 }
 
 async function doMood(){
-  const d=pr(await api(`Concept:"${v('m-concept')}". Industry:"${v('m-ind')||'any'}". Audience:"${v('m-aud')||'unspecified'}".`,`Expert creative director. Complete mood board direction.\nReturn ONLY valid JSON:\n{"title":"string","tagline":"string","palette":{"primary":"#hex","secondary":"#hex","accent":"#hex"},"typography":{"display":"string","body":"string","rationale":"string"},"imagery":["string","string","string"],"textures":["string","string"],"feeling":"string","references":["string","string","string"],"avoid":"string"}`));
+  const d=await gen('mood',`Concept:"${v('m-concept')}". Industry:"${v('m-ind')||'any'}". Audience:"${v('m-aud')||'unspecified'}".`,`Expert creative director. Complete mood board direction.\nReturn ONLY valid JSON:\n{"title":"string","tagline":"string","palette":{"primary":"#hex","secondary":"#hex","accent":"#hex"},"typography":{"display":"string","body":"string","rationale":"string"},"imagery":["string","string","string"],"textures":["string","string"],"feeling":"string","references":["string","string","string"],"avoid":"string"}`);
   const cols=[d.palette.primary,d.palette.secondary,d.palette.accent];
   const clabels=['PRIMARY','SECONDARY','ACCENT'];
   const mcells=cols.map((c,i)=>`<div class="mcell" style="background:${c}"><div class="mclabel" style="color:${lm(c)>0.5?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.5)'}">${clabels[i]}</div><div class="mcval" style="color:${lm(c)>0.5?'#000':'#fff'}">${c}</div></div>`).join('');
@@ -690,14 +1411,14 @@ async function doMood(){
 }
 
 async function doLogo(){
-  const d=pr(await api(`Brand:"${v('l-name')}". Description:"${v('l-desc')}". Style:"${v('l-style')||'open'}".`,`Award-winning brand identity designer. 3 genuinely distinct concept routes.\nReturn ONLY valid JSON:\n{"concepts":[{"name":"string","approach":"string","rationale":"string","style":"string","colors":"string","typography":"string","standout":"string"}]}`));
+  const d=await gen('logo',`Brand:"${v('l-name')}". Description:"${v('l-desc')}". Style:"${v('l-style')||'open'}".`,`Award-winning brand identity designer. 3 genuinely distinct concept routes.\nReturn ONLY valid JSON:\n{"concepts":[{"name":"string","approach":"string","rationale":"string","style":"string","colors":"string","typography":"string","standout":"string"}]}`);
   const cc=['var(--blue)','var(--purple)','var(--blue)'];
   const cards=d.concepts.map((c,i)=>`<div class="lcard" style="border-top:2px solid ${cc[i]}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px"><div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${cc[i]};letter-spacing:2px;margin-bottom:4px">CONCEPT 0${i+1}</div><div style="font-size:16px;font-weight:800">${c.name}</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;background:rgba(255,255,255,0.05);border-radius:4px;padding:3px 9px;color:var(--muted)">${c.approach}</div></div><div class="rgrid"><div class="ri"><label>RATIONALE</label><p>${c.rationale}</p></div><div class="ri"><label>VISUAL STYLE</label><p>${c.style}</p></div><div class="ri"><label>COLOR DIRECTION</label><p>${c.colors}</p></div><div class="ri"><label>TYPOGRAPHY</label><p>${c.typography}</p></div></div><div class="iconic" style="margin-top:10px;border-color:${cc[i]}40"><span class="iconic-l">WHAT MAKES THIS DIFFERENT</span><div class="iconic-t" style="color:${cc[i]}">${c.standout}</div></div></div>`).join('');
   sr('logo',`<div class="result"><div class="rh"><span class="rh-label">3 LOGO CONCEPT ROUTES</span></div><div class="rb">${cards}</div></div>`);
 }
 
 async function doVoice(){
-  const d=pr(await api(`Brand:"${v('v-brand')}". Existing copy:"${v('v-copy')||'none'}".`,`Expert brand strategist. Define this voice completely.\nReturn ONLY valid JSON:\n{"voice_name":"string","description":"string","traits":[{"name":"string","score":75,"desc":"string"}],"dos":["string","string","string","string"],"donts":["string","string","string","string"],"sample":{"tagline":"string","caption":"string","bio":"string"}}`));
+  const d=await gen('voice',`Brand:"${v('v-brand')}". Existing copy:"${v('v-copy')||'none'}".`,`Expert brand strategist. Define this voice completely.\nReturn ONLY valid JSON:\n{"voice_name":"string","description":"string","traits":[{"name":"string","score":75,"desc":"string"}],"dos":["string","string","string","string"],"donts":["string","string","string","string"],"sample":{"tagline":"string","caption":"string","bio":"string"}}`);
   const traits=d.traits.map(t=>`<div class="vtrait"><div class="vtl">${t.name.toUpperCase()}</div><div class="vbar"><div class="vfill" style="width:${t.score}%"></div></div><div class="vval">${t.score}</div></div>`).join('');
   const dos=d.dos.map(x=>`<div class="rli"><span class="rln" style="color:var(--green)">✓</span><span class="rlt">${x}</span></div>`).join('');
   const donts=d.donts.map(x=>`<div class="rli"><span class="rln" style="color:#f87171">✗</span><span class="rlt">${x}</span></div>`).join('');
@@ -705,7 +1426,7 @@ async function doVoice(){
 }
 
 async function doProposal(){
-  const d=pr(await api(`Designer:"${v('pr-you')}". Client:"${v('pr-client')}". Project:"${v('pr-proj')}". Price:"${v('pr-price')}". Timeline:"${v('pr-time')}".`,`Senior creative professional. Winning proposal, professional but warm.\nReturn ONLY valid JSON:\n{"intro":"string","understanding":"string","approach":"string","deliverables":["string","string","string","string"],"process":["string","string","string"],"terms":["string","string","string"],"closing":"string"}`));
+  const d=await gen('proposal',`Designer:"${v('pr-you')}". Client:"${v('pr-client')}". Project:"${v('pr-proj')}". Price:"${v('pr-price')}". Timeline:"${v('pr-time')}".`,`Senior creative professional. Winning proposal, professional but warm.\nReturn ONLY valid JSON:\n{"intro":"string","understanding":"string","approach":"string","deliverables":["string","string","string","string"],"process":["string","string","string"],"terms":["string","string","string"],"closing":"string"}`);
   const dels=d.deliverables.map(dl=>`<tr><td>→ ${dl}</td></tr>`).join('');
   const proc=d.process.map((p,i)=>`<tr><td style="font-weight:700;color:#0d5a80">Phase ${i+1}</td><td>${p}</td></tr>`).join('');
   sr('proposal',`<div class="result"><div class="rh"><span class="rh-label">PROPOSAL GENERATED</span><button class="cpbtn" onclick="window.print()">Print / PDF</button></div><div class="rb"><div class="doc"><div class="doch"><div><div class="doct">PROPOSAL</div><div class="docbr">PIXELMIND™ · BLEUDREAMS™</div></div><div style="text-align:right;font-size:12px;color:var(--muted2)"><strong>${v('pr-you')}</strong><br/>For: ${v('pr-client')}<br/>${new Date().toLocaleDateString()}</div></div><div class="docs"><div class="docsl">Introduction</div><div class="docb">${d.intro}</div></div><div class="docs"><div class="docsl">Understanding Your Needs</div><div class="docb">${d.understanding}</div></div><div class="docs"><div class="docsl">Our Approach</div><div class="docb">${d.approach}</div></div><div class="docs"><div class="docsl">Deliverables</div><table class="doctbl"><thead><tr><th>Included</th></tr></thead><tbody>${dels}</tbody></table></div><div class="docs"><div class="docsl">Process</div><table class="doctbl"><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>${proc}</tbody></table></div><div class="doctot"><span class="doctot-l">TOTAL INVESTMENT · ${v('pr-time')}</span><span class="doctot-a">${v('pr-price')}</span></div><div class="docs" style="margin-top:14px"><div class="docsl">Terms</div><div class="docb">${d.terms.map((t,i)=>`${i+1}. ${t}`).join('<br/>')}</div></div><div class="docs"><div class="docsl">Next Steps</div><div class="docb">${d.closing}</div></div></div></div></div>`);
@@ -713,51 +1434,51 @@ async function doProposal(){
 
 async function doInvoice(){
   const items=v('inv-items').split('\n').filter(l=>l.trim());
-  const d=pr(await api(`Designer:"${v('inv-you')}". Client:"${v('inv-client')}". Items:${JSON.stringify(items)}. Due:"${v('inv-due')}". Payment:"${v('inv-pay')}".`,`Professional invoice generator.\nReturn ONLY valid JSON:\n{"invoice_num":"INV-001","items":[{"description":"string","amount":"string"}],"subtotal":"string","total":"string","notes":"string"}`));
+  const d=await gen('invoice',`Designer:"${v('inv-you')}". Client:"${v('inv-client')}". Items:${JSON.stringify(items)}. Due:"${v('inv-due')}". Payment:"${v('inv-pay')}".`,`Professional invoice generator.\nReturn ONLY valid JSON:\n{"invoice_num":"INV-001","items":[{"description":"string","amount":"string"}],"subtotal":"string","total":"string","notes":"string"}`);
   const rows=d.items.map(it=>`<tr><td>${it.description}</td><td style="text-align:right;font-weight:600">${it.amount}</td></tr>`).join('');
   sr('invoice',`<div class="result"><div class="rh"><span class="rh-label">INVOICE GENERATED</span><button class="cpbtn" onclick="window.print()">Print / PDF</button></div><div class="rb"><div class="doc"><div class="doch"><div><div class="doct">INVOICE</div><div class="docbr">${d.invoice_num}</div></div><div style="text-align:right;font-size:12px;color:var(--muted2)"><strong>${v('inv-you')}</strong><br/>Bill to: ${v('inv-client')}<br/>${new Date().toLocaleDateString()}</div></div><table class="doctbl"><thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}<tr style="background:rgba(79,195,247,0.08)"><td style="font-weight:700">Subtotal</td><td style="text-align:right;font-weight:700">${d.subtotal}</td></tr></tbody></table><div class="doctot"><span class="doctot-l">TOTAL DUE · ${v('inv-due')}</span><span class="doctot-a">${d.total}</span></div><div style="margin-top:14px;font-size:12px;color:var(--muted2)"><strong>Payment:</strong> ${v('inv-pay')}<br/><br/>${d.notes}</div></div></div></div>`);
 }
 
 async function doScope(){
-  const d=pr(await api(`Project:"${v('sc-proj')}". Rate:"${v('sc-rate')||'$75/hr'}". Level:"${v('sc-lvl')}".`,`Expert project manager. Break down scope realistically, don't underestimate.\nReturn ONLY valid JSON:\n{"deliverables":[{"name":"string","hours":8,"notes":"string"}],"total_hours":30,"recommended_price":"string","buffer_note":"string","payment_structure":["string","string"]}`));
+  const d=await gen('scope',`Project:"${v('sc-proj')}". Rate:"${v('sc-rate')||'$75/hr'}". Level:"${v('sc-lvl')}".`,`Expert project manager. Break down scope realistically, don't underestimate.\nReturn ONLY valid JSON:\n{"deliverables":[{"name":"string","hours":8,"notes":"string"}],"total_hours":30,"recommended_price":"string","buffer_note":"string","payment_structure":["string","string"]}`);
   const rows=d.deliverables.map(dl=>`<tr><td>${dl.name}</td><td>${dl.hours} hrs</td><td style="color:var(--muted2);font-size:12px">${dl.notes}</td></tr>`).join('');
   sr('scope',`<div class="result"><div class="rh"><span class="rh-label">SCOPE CALCULATED</span></div><div class="rb"><table class="stbl"><thead><tr><th>Deliverable</th><th>Hours</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table><div class="stot"><div><div class="stot-l">TOTAL HOURS</div><div style="font-size:13px;color:var(--muted2);margin-top:2px">${d.total_hours} hours</div></div><div class="stot-a">${d.recommended_price}</div></div><div class="ri" style="margin-top:12px"><label>⚠ BUFFER NOTE</label><p>${d.buffer_note}</p></div><div class="ri" style="margin-top:9px"><label>PAYMENT STRUCTURE</label><div class="rlist">${d.payment_structure.map((p,i)=>`<div class="rli"><span class="rln">0${i+1}</span><span class="rlt">${p}</span></div>`).join('')}</div></div></div></div>`);
 }
 
 async function doQ(){
-  const d=pr(await api(`Project:"${v('q-proj')}". Industry:"${v('q-ind')||'any'}". Specific:"${v('q-spec')||'none'}".`,`Expert creative strategist. Questions that uncover everything before design starts.\nReturn ONLY valid JSON:\n{"sections":[{"title":"string","questions":["string","string","string"]}]}`));
+  const d=await gen('questionnaire',`Project:"${v('q-proj')}". Industry:"${v('q-ind')||'any'}". Specific:"${v('q-spec')||'none'}".`,`Expert creative strategist. Questions that uncover everything before design starts.\nReturn ONLY valid JSON:\n{"sections":[{"title":"string","questions":["string","string","string"]}]}`);
   const sections=d.sections.map(s=>`<div style="margin-bottom:18px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:3px;margin-bottom:9px">${s.title.toUpperCase()}</div><div class="qlist">${s.questions.map((q,i)=>`<div class="qitem"><span class="qnum">Q${i+1}</span><span class="qtxt">${q}</span></div>`).join('')}</div></div>`).join('');
   sr('questionnaire',`<div class="result"><div class="rh"><span class="rh-label">QUESTIONNAIRE GENERATED</span></div><div class="rb">${sections}</div></div>`);
 }
 
 async function doTranslator(){
-  const d=pr(await api(`Feedback:"${v('t-fb')}". Context:"${v('t-ctx')||'unspecified'}".`,`Expert creative director. Decode client language into design direction.\nReturn ONLY valid JSON:\n{"reacting_to":"string","want_instead":"string","changes":["string","string","string"],"reply":"string"}`));
+  const d=await gen('translator',`Feedback:"${v('t-fb')}". Context:"${v('t-ctx')||'unspecified'}".`,`Expert creative director. Decode client language into design direction.\nReturn ONLY valid JSON:\n{"reacting_to":"string","want_instead":"string","changes":["string","string","string"],"reply":"string"}`);
   sr('translator',`<div class="result"><div class="rh"><span class="rh-label">CLIENT DECODED</span></div><div class="rb"><span class="rl">WHAT THEY'RE ACTUALLY REACTING TO</span><p class="rtx" style="margin-bottom:14px">${d.reacting_to}</p><span class="rl">WHAT THEY WANT INSTEAD</span><p class="rtx" style="margin-bottom:14px">${d.want_instead}</p><div class="rdiv"></div><span class="rl">THREE CONCRETE CHANGES</span><div class="rlist" style="margin-top:9px">${d.changes.map((c,i)=>`<div class="rli"><span class="rln">${i+1}.</span><span class="rlt">${c}</span></div>`).join('')}</div><div class="iconic" style="margin-top:14px"><span class="iconic-l">WHAT TO SAY BACK TO THEM</span><div class="iconic-t">${d.reply}</div></div></div></div>`);
 }
 
 async function doCaptions(){
-  const d=pr(await api(`Topic:"${v('cap-topic')}". Voice:"${v('cap-voice')||'direct and confident'}". CTA:"${v('cap-cta')||'link in bio'}".`,`Expert social media copywriter. Human, scroll-stopping, no AI openers.\nReturn ONLY valid JSON:\n{"tiktok":"string","instagram":"string","linkedin":"string","x":"string"}`));
+  const d=await gen('captions',`Topic:"${v('cap-topic')}". Voice:"${v('cap-voice')||'direct and confident'}". CTA:"${v('cap-cta')||'link in bio'}".`,`Expert social media copywriter. Human, scroll-stopping, no AI openers.\nReturn ONLY valid JSON:\n{"tiktok":"string","instagram":"string","linkedin":"string","x":"string"}`);
   const plats=[{n:'TIKTOK',k:'tiktok',c:'#fff',bg:'rgba(1,1,1,0.3)'},{n:'INSTAGRAM',k:'instagram',c:'#E1306C',bg:'rgba(225,48,108,0.1)'},{n:'LINKEDIN',k:'linkedin',c:'#0077B5',bg:'rgba(0,119,181,0.1)'},{n:'X / TWITTER',k:'x',c:'#fff',bg:'rgba(255,255,255,0.06)'}];
   const cards=plats.map(p=>`<div class="cap-card"><span class="cap-plat" style="background:${p.bg};color:${p.c};border:1px solid ${p.c}40">${p.n}</span><span class="cap-text">${d[p.k]}</span><button class="cpbtn" onclick="cp(this.previousElementSibling.textContent)">Copy</button></div>`).join('');
   sr('captions',`<div class="result"><div class="rh"><span class="rh-label">CAPTIONS GENERATED</span></div><div class="rb"><div class="cap-cards">${cards}</div></div></div>`);
 }
 
 async function doCalendar(){
-  const d=pr(await api(`Brand:"${v('cal-brand')}". Goal:"${v('cal-goal')}". Platform:"${v('cal-plat')}".`,`Expert content strategist. 30-day plan, every post purposeful.\nReturn ONLY valid JSON:\n{"theme":"string","weeks":[{"week":1,"focus":"string","posts":[{"day":1,"type":"string","topic":"string"},{"day":2,"type":"string","topic":"string"},{"day":3,"type":"string","topic":"string"},{"day":4,"type":"string","topic":"string"},{"day":5,"type":"string","topic":"string"},{"day":6,"type":"string","topic":"string"},{"day":7,"type":"string","topic":"string"}]},{"week":2,"focus":"string","posts":[{"day":8,"type":"string","topic":"string"},{"day":9,"type":"string","topic":"string"},{"day":10,"type":"string","topic":"string"},{"day":11,"type":"string","topic":"string"},{"day":12,"type":"string","topic":"string"},{"day":13,"type":"string","topic":"string"},{"day":14,"type":"string","topic":"string"}]}]}`));
+  const d=await gen('calendar',`Brand:"${v('cal-brand')}". Goal:"${v('cal-goal')}". Platform:"${v('cal-plat')}".`,`Expert content strategist. 30-day plan, every post purposeful.\nReturn ONLY valid JSON:\n{"theme":"string","weeks":[{"week":1,"focus":"string","posts":[{"day":1,"type":"string","topic":"string"},{"day":2,"type":"string","topic":"string"},{"day":3,"type":"string","topic":"string"},{"day":4,"type":"string","topic":"string"},{"day":5,"type":"string","topic":"string"},{"day":6,"type":"string","topic":"string"},{"day":7,"type":"string","topic":"string"}]},{"week":2,"focus":"string","posts":[{"day":8,"type":"string","topic":"string"},{"day":9,"type":"string","topic":"string"},{"day":10,"type":"string","topic":"string"},{"day":11,"type":"string","topic":"string"},{"day":12,"type":"string","topic":"string"},{"day":13,"type":"string","topic":"string"},{"day":14,"type":"string","topic":"string"}]}]}`);
   const tc=['rgba(79,195,247,0.2)','rgba(139,92,246,0.2)','rgba(16,185,129,0.2)','rgba(245,158,11,0.2)','rgba(236,72,153,0.2)'];
   const weeks=d.weeks.map(w=>`<div style="margin-bottom:24px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:3px;margin-bottom:8px">WEEK ${w.week} — ${w.focus.toUpperCase()}</div><div class="calgrid">${['MON','TUE','WED','THU','FRI','SAT','SUN'].map(h=>`<div class="calh">${h}</div>`).join('')}${w.posts.map((p,i)=>`<div class="cald"><div class="caldn">Day ${p.day}</div><div class="caldtxt">${p.topic}</div><div class="caldtag" style="background:${tc[i%5]};color:var(--text)">${p.type}</div></div>`).join('')}</div></div>`).join('');
   sr('calendar',`<div class="result"><div class="rh"><span class="rh-label">CONTENT CALENDAR</span></div><div class="rb"><span class="rl">CONTENT THEME</span><div class="rt" style="margin-bottom:22px">${d.theme}</div>${weeks}</div></div>`);
 }
 
 async function doHashtags(){
-  const d=pr(await api(`Content:"${v('h-brand')}". Platform:"${v('h-plat')}". Niche:"${v('h-niche')||'general'}".`,`Expert social media strategist. Tiered hashtag strategy.\nReturn ONLY valid JSON:\n{"strategy":"string","sets":[{"tier":"Broad (1M+)","tags":["string","string","string"],"note":"string"},{"tier":"Mid (100K-1M)","tags":["string","string","string","string"],"note":"string"},{"tier":"Niche (<100K)","tags":["string","string","string","string","string"],"note":"string"}],"branded":["string","string"],"tip":"string"}`));
+  const d=await gen('hashtags',`Content:"${v('h-brand')}". Platform:"${v('h-plat')}". Niche:"${v('h-niche')||'general'}".`,`Expert social media strategist. Tiered hashtag strategy.\nReturn ONLY valid JSON:\n{"strategy":"string","sets":[{"tier":"Broad (1M+)","tags":["string","string","string"],"note":"string"},{"tier":"Mid (100K-1M)","tags":["string","string","string","string"],"note":"string"},{"tier":"Niche (<100K)","tags":["string","string","string","string","string"],"note":"string"}],"branded":["string","string"],"tip":"string"}`);
   const tc=['#f87171','var(--blue)','var(--green)'];const tbg=['rgba(239,68,68,0.12)','rgba(245,158,11,0.12)','rgba(16,185,129,0.12)'];
   const sets=d.sets.map((s,i)=>`<div style="margin-bottom:14px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${tc[i]};letter-spacing:2px;margin-bottom:7px">${s.tier}</div><div class="hcloud">${s.tags.map(t=>`<div class="htag" style="background:${tbg[i]};color:${tc[i]};border-color:${tc[i]}30" onclick="cp('${(t.startsWith('#')?t:'#'+t)}')">${t.startsWith('#')?t:'#'+t}</div>`).join('')}</div><p style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic">${s.note}</p></div>`).join('');
   sr('hashtags',`<div class="result"><div class="rh"><span class="rh-label">HASHTAG STRATEGY</span></div><div class="rb"><p class="rtx" style="margin-bottom:18px">${d.strategy}</p>${sets}<div class="rdiv"></div><span class="rl">BRANDED HASHTAGS</span><div class="hcloud" style="margin-top:9px">${d.branded.map(t=>`<div class="htag" style="background:rgba(79,195,247,0.1);color:var(--blue);border-color:rgba(79,195,247,0.3)" onclick="cp('${(t.startsWith('#')?t:'#'+t)}')">${t.startsWith('#')?t:'#'+t}</div>`).join('')}</div><div class="iconic" style="margin-top:14px"><span class="iconic-l">PRO TIP</span><div class="iconic-t">${d.tip}</div></div><p style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:10px;letter-spacing:1px">CLICK ANY HASHTAG TO COPY</p></div></div>`);
 }
 
 async function doHooks(){
-  const d=pr(await api(`Topic:"${v('hk-topic')}". Platform:"${v('hk-plat')}". Tone:"${v('hk-tone')}".`,`Expert copywriter. Hooks that stop scrolls cold. Human, punchy, never generic.\nReturn ONLY valid JSON:\n{"hooks":[{"type":"string","hook":"string"}]}`));
+  const d=await gen('hooks',`Topic:"${v('hk-topic')}". Platform:"${v('hk-plat')}". Tone:"${v('hk-tone')}".`,`Expert copywriter. Hooks that stop scrolls cold. Human, punchy, never generic.\nReturn ONLY valid JSON:\n{"hooks":[{"type":"string","hook":"string"}]}`);
   const cc=['var(--blue)','var(--purple)','var(--blue)','var(--green)','var(--pink)'];
   const cards=d.hooks.map((h,i)=>`<div class="hcard" style="border-left-color:${cc[i%5]}"><span class="htype">${h.type.toUpperCase()}</span><div class="htext">${h.hook}</div><button class="cpbtn" style="margin-top:9px" onclick="cp('${h.hook.replace(/'/g,"\\'")}')">Copy Hook</button></div>`).join('');
   sr('hooks',`<div class="result"><div class="rh"><span class="rh-label">${d.hooks.length} HOOKS GENERATED</span></div><div class="rb"><div class="hcards">${cards}</div></div></div>`);
@@ -766,7 +1487,7 @@ async function doHooks(){
 async function doMockup(){
   const typeLabels={logo:'Logo & Brand Identity',flyer:'Flyer / Print Design',social:'Social Media Post',brand_kit:'Brand Kit',website:'Website Section',product:'Product / Packaging',marketing:'Marketing Asset',client:'Client Design Concept'};
   const t=v('mk-type');
-  const d=pr(await api(`Type:"${typeLabels[t]||t}". Concept:"${v('mk-concept')}". Brand:"${v('mk-brand')||'unspecified'}". Style:"${v('mk-style')||'open'}". Audience:"${v('mk-aud')||'unspecified'}".`,`You are a senior creative director and brand strategist with 20 years of experience. Generate a professional, detailed mockup concept brief. Be specific and visual — give real creative direction, not vague suggestions.\nReturn ONLY valid JSON:\n{"mockup_title":"string","design_concept":"string","visual_direction":{"layout":"string","color_approach":"string","typography":"string","imagery":"string"},"key_elements":["string","string","string","string"],"presentation_strategy":"string","client_angle":"string","what_makes_it_work":"string","production_notes":["string","string","string"]}`));
+  const d=await gen('mockup',`Type:"${typeLabels[t]||t}". Concept:"${v('mk-concept')}". Brand:"${v('mk-brand')||'unspecified'}". Style:"${v('mk-style')||'open'}". Audience:"${v('mk-aud')||'unspecified'}".`,`You are a senior creative director and brand strategist with 20 years of experience. Generate a professional, detailed mockup concept brief. Be specific and visual — give real creative direction, not vague suggestions.\nReturn ONLY valid JSON:\n{"mockup_title":"string","design_concept":"string","visual_direction":{"layout":"string","color_approach":"string","typography":"string","imagery":"string"},"key_elements":["string","string","string","string"],"presentation_strategy":"string","client_angle":"string","what_makes_it_work":"string","production_notes":["string","string","string"]}`);
   const els=d.key_elements.map((e,i)=>`<div class="rli"><span class="rln" style="color:var(--purple)">0${i+1}</span><span class="rlt">${e}</span></div>`).join('');
   const notes=d.production_notes.map((n,i)=>`<div class="rli"><span class="rln">→</span><span class="rlt">${n}</span></div>`).join('');
   sr('mockup',`<div class="result"><div class="rh" style="background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(79,195,247,0.05))"><span class="rh-label" style="color:#a78bfa">MOCKUP CONCEPT GENERATED · ${(typeLabels[t]||t).toUpperCase()}</span></div><div class="rb"><span class="rl" style="color:#a78bfa">CONCEPT TITLE</span><div class="rt" style="margin-bottom:6px">${d.mockup_title}</div><p class="rtx" style="margin-bottom:20px">${d.design_concept}</p><div class="rdiv"></div><span class="rl" style="color:#a78bfa">VISUAL DIRECTION</span><div class="rgrid" style="margin-top:10px;margin-bottom:16px"><div class="ri"><label>LAYOUT</label><p>${d.visual_direction.layout}</p></div><div class="ri"><label>COLOR APPROACH</label><p>${d.visual_direction.color_approach}</p></div><div class="ri"><label>TYPOGRAPHY</label><p>${d.visual_direction.typography}</p></div><div class="ri"><label>IMAGERY DIRECTION</label><p>${d.visual_direction.imagery}</p></div></div><div class="rdiv"></div><span class="rl" style="color:#a78bfa">KEY DESIGN ELEMENTS</span><div class="rlist" style="margin-top:9px;margin-bottom:18px">${els}</div><div class="rdiv"></div><div class="iconic" style="border-color:rgba(139,92,246,0.3)"><span class="iconic-l" style="color:#a78bfa">WHAT MAKES THIS WORK</span><div class="iconic-t">${d.what_makes_it_work}</div></div><div class="rgrid" style="margin-top:14px"><div class="ri"><label style="color:#a78bfa">CLIENT PRESENTATION ANGLE</label><p>${d.client_angle}</p></div><div class="ri"><label style="color:#a78bfa">PRESENTATION STRATEGY</label><p>${d.presentation_strategy}</p></div></div><div class="rdiv"></div><span class="rl" style="color:#a78bfa">PRODUCTION NOTES</span><div class="rlist" style="margin-top:9px">${notes}</div></div></div>`);
